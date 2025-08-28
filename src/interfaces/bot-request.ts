@@ -2,6 +2,7 @@ export enum BotRequestName {
   GO_TO_MENU = "go_to_menu",
   PLAY_HAND_OR_DISCARD = "play_hand_or_discard",
   REARRANGE_CONSUMABLES = "rearrange_consumables",
+  REARRANGE_JOKERS = "rearrange_jokers",
   REARRANGE_HAND = "rearrange_hand",
   SELL_CONSUMABLE = "sell_consumable",
   SELL_JOKER = "sell_joker",

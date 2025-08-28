@@ -8,6 +8,7 @@ import { parseShopAction } from "./shop.parser";
 import { parseSkipOrSelectBlindAction } from "./skip-or-select-blind.parser";
 import { parseUseConsumableAction } from "./use-consumable.parser";
 import { parseStartRunAction } from "./start-run.parser";
+import { parseRearrangeJokersAction } from "./rearrange-jokers.parser";
 
 export function parseAllParser(msg: string): ChatAction | null {
   const normalized = msg.toLowerCase().trim();
@@ -29,6 +30,8 @@ export function parseAllParser(msg: string): ChatAction | null {
       return parseRearrangeHandAction(normalized);
     case "arrangerconso":
       return parseRearrangeConsumablesAction(normalized);
+    case "arrangerjokers":
+      return parseRearrangeJokersAction(normalized);
     case "vendreconso":
       return parseSellConsumableAction(normalized);
     case "vendrejoker":

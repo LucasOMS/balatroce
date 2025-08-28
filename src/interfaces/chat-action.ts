@@ -7,11 +7,13 @@ import { ShopAction } from "./actions/shop.action";
 import { SkipOrSelectBlindAction } from "./actions/skip-or-select-blind.action";
 import { UseConsumableAction } from "./actions/use-consumable.action";
 import { StartRunAction } from "./actions/start-run.action";
+import { RearrangeJokerAction } from "./actions/rearrange-joker.action";
 
 export type ChatAction =
   | PlayOrDiscardAction
   | RearrangeConsumablesAction
   | RearrangeHandAction
+  | RearrangeJokerAction
   | SellConsumableAction
   | SellJokerAction
   | ShopAction

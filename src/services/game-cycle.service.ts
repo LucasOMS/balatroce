@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { CardSet, GameCycleState, GameState } from "src/interfaces/game-state";
 import { BotService } from "./bot.service";
-import { firstValueFrom, lastValueFrom, Subject } from "rxjs";
+import { firstValueFrom, Subject } from "rxjs";
 import { ChatAction } from "../interfaces/chat-action";
 import { BotRequestName } from "../interfaces/bot-request";
 import { PlayOrDiscardAction } from "../interfaces/actions/play-or-discard.action";
@@ -11,6 +11,7 @@ import { UseConsumableAction } from "src/interfaces/actions/use-consumable.actio
 import { SellConsumableAction } from "../interfaces/actions/sell-consumable.action";
 import { SellJokerAction } from "src/interfaces/actions/sell-joker.action";
 import { ShopAction } from "src/interfaces/actions/shop.action";
+import { RearrangeJokerAction } from "../interfaces/actions/rearrange-joker.action";
 
 @Injectable()
 export class GameCycleService implements OnModuleInit {
@@ -42,6 +43,7 @@ export class GameCycleService implements OnModuleInit {
           BotRequestName.SELL_CONSUMABLE,
           BotRequestName.SELL_JOKER,
           BotRequestName.USE_CONSUMABLE,
+          BotRequestName.REARRANGE_JOKERS,
         ];
         break;
       case GameCycleState.BLIND_SELECT:
@@ -50,6 +52,7 @@ export class GameCycleService implements OnModuleInit {
           BotRequestName.SELL_JOKER,
           BotRequestName.SELL_CONSUMABLE,
           BotRequestName.USE_CONSUMABLE,
+          BotRequestName.REARRANGE_JOKERS,
         ];
         break;
       case GameCycleState.MENU:
@@ -62,6 +65,7 @@ export class GameCycleService implements OnModuleInit {
           BotRequestName.SELL_JOKER,
           BotRequestName.SELL_CONSUMABLE,
           BotRequestName.USE_CONSUMABLE,
+          BotRequestName.REARRANGE_JOKERS,
         ];
         break;
       case GameCycleState.SHOP:
@@ -70,6 +74,7 @@ export class GameCycleService implements OnModuleInit {
           BotRequestName.SELL_JOKER,
           BotRequestName.SELL_CONSUMABLE,
           BotRequestName.USE_CONSUMABLE,
+          BotRequestName.REARRANGE_JOKERS,
         ];
         break;
     }
@@ -122,6 +127,13 @@ export class GameCycleService implements OnModuleInit {
           return false;
         }
         break;
+      case BotRequestName.REARRANGE_JOKERS:
+        const rearrangeJokersAction = action as unknown as RearrangeJokerAction;
+        if (!validateIndexes(jokerCount, rearrangeJokersAction.arguments.jokers)) {
+          return false;
+        }
+        break;
+
 
       case BotRequestName.USE_CONSUMABLE:
         const useConsumableAction = action as unknown as UseConsumableAction;
