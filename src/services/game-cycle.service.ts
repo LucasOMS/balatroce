@@ -182,7 +182,7 @@ export class GameCycleService implements OnModuleInit {
             }
 
             // Not enough space for consumable
-            if (consumableEmptySlotCount === 0) {
+            if (cardToBuy.ability.set !== CardSet.JOKER && consumableEmptySlotCount === 0) {
               return false;
             }
             break;
