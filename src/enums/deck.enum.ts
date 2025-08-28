@@ -1,0 +1,17 @@
+export enum Deck {
+  RED = "Red Deck",
+  BLUE = "Blue Deck",
+  YELLOW = "Yellow Deck",
+  GREEN = "Green Deck",
+  BLACK = "Black Deck",
+  MAGIC = "Magic Deck",
+  NEBULA = "Nebula Deck",
+  GHOST = "Ghost Deck",
+  ABANDONED = "Abandoned Deck",
+  CHECKERED = "Checkered Deck",
+  ZODIAC = "Zodiac Deck",
+  PAINTED = "Painted Deck",
+  ANAGLYPH = "Anaglyph Deck",
+  PLASMA = "Plasma Deck",
+  ERRATIC = "Erratic Deck",
+}
