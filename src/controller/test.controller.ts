@@ -3,7 +3,6 @@ import { BotService } from "src/services/bot.service";
 import { parseAllParser } from "../parsers/parse-all.parser";
 import { ChatAction } from "src/interfaces/chat-action";
 import { GameCycleService } from "../services/game-cycle.service";
-import { parseShopAction } from "../parsers/shop.parser";
 
 @Controller()
 export class TestController {

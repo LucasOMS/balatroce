@@ -1,6 +1,6 @@
 import { extractArguments, getCardIndexes } from "./utils/card-utils";
-import { BotRequestName } from "../interfaces/bot-request";
-import { RearrangeJokerAction } from "../interfaces/actions/rearrange-joker.action";
+import { BotMethod } from "../interfaces/bot-request";
+import { RearrangeJokersAction } from "../interfaces/actions/rearrange-joker.action";
 
 /**
  * Parse rearrange joker action
@@ -8,22 +8,10 @@ import { RearrangeJokerAction } from "../interfaces/actions/rearrange-joker.acti
  */
 export function parseRearrangeJokersAction(
   input: string,
-): RearrangeJokerAction | null {
+): RearrangeJokersAction | null {
   const args = extractArguments(input);
-
-  if (args.length === 0) {
-    return null;
-  }
-
+  if (args.length === 0) return null;
   const cards = getCardIndexes(args);
-  if (cards === null) {
-    return null;
-  }
-
-  return {
-    name: BotRequestName.REARRANGE_JOKERS,
-    arguments: {
-      jokers: cards,
-    },
-  };
+  if (cards === null) return null;
+  return { method: BotMethod.REARRANGE, params: { jokers: cards } };
 }

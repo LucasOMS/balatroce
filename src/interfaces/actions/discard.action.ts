@@ -1,8 +1,8 @@
 import { BotRequest, BotMethod } from "../bot-request";
 import { CardIndexes } from "../../types/card-indexes.type";
 
-export interface PlayAction extends BotRequest {
-  method: BotMethod.PLAY;
+export interface DiscardAction extends BotRequest {
+  method: BotMethod.DISCARD;
   params: {
     cards: CardIndexes;
   };

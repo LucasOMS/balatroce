@@ -1,26 +1,25 @@
-import { SkipOrSelectBlindAction } from "../interfaces/actions/skip-or-select-blind.action";
+import { SelectBlindAction, SkipBlindAction } from "../interfaces/actions/skip-or-select-blind.action";
 import { extractArguments } from "./utils/card-utils";
-import { BotRequestName } from "../interfaces/bot-request";
+import { BotMethod } from "../interfaces/bot-request";
 
 /**
- * Parse skip or select blind action
- * Examples: !passer or !jouer (without arguments)
+ * Parse select blind action
+ * Example: !selectionner
  */
-export function parseSkipOrSelectBlindAction(
+export function parseSelectBlindAction(
   input: string,
-  actionType: "skip" | "select",
-): SkipOrSelectBlindAction | null {
+): SelectBlindAction | null {
   const args = extractArguments(input);
+  if (args.length !== 0) return null;
+  return { method: BotMethod.SELECT };
+}
 
-  // These actions should not have arguments
-  if (args.length !== 0) {
-    return null;
-  }
-
-  return {
-    name: BotRequestName.SKIP_OR_SELECT_BLIND,
-    arguments: {
-      action: actionType,
-    },
-  };
+/**
+ * Parse skip blind action
+ * Example: !passer
+ */
+export function parseSkipBlindAction(input: string): SkipBlindAction | null {
+  const args = extractArguments(input);
+  if (args.length !== 0) return null;
+  return { method: BotMethod.SKIP };
 }

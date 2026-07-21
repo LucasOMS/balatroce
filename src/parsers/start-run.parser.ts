@@ -1,53 +1,43 @@
 import { StartRunAction } from "../interfaces/actions/start-run.action";
 import { Deck } from "../enums/deck.enum";
+import { Stake } from "../enums/stake.enum";
 import { extractArguments } from "./utils/card-utils";
-import { BotRequestName } from "../interfaces/bot-request";
+import { BotMethod } from "../interfaces/bot-request";
 
 /**
  * Parse start run action
- * Example: !commencer "Red Deck" 3 seed123 "Challenge Name"
+ * Example: !commencer RED WHITE seed123
+ * Deck values: RED, BLUE, YELLOW, GREEN, BLACK, MAGIC, NEBULA, GHOST, ABANDONED, CHECKERED, ZODIAC, PAINTED, ANAGLYPH, PLASMA, ERRATIC
+ * Stake values: WHITE, RED, GREEN, BLACK, BLUE, PURPLE, ORANGE, GOLD
  */
 export function parseStartRunAction(input: string): StartRunAction | null {
   const args = extractArguments(input);
 
-  // Need at least deck and stake
   if (args.length < 2) {
     return null;
   }
 
-  const deckName = args[0];
-  const stakeStr = args[1];
+  const deckName = args[0].toUpperCase();
+  const stakeName = args[1].toUpperCase();
 
-  // Validate deck
   if (!Object.values(Deck).includes(deckName as Deck)) {
     return null;
   }
 
-  // Validate stake
-  const stake = parseInt(stakeStr, 10);
-  if (isNaN(stake) || stake < 1 || stake > 8) {
+  if (!Object.values(Stake).includes(stakeName as Stake)) {
     return null;
   }
 
   const result: StartRunAction = {
-    name: BotRequestName.START_RUN,
-    arguments: {
+    method: BotMethod.START,
+    params: {
       deck: deckName as Deck,
-      stake: stake,
+      stake: stakeName as Stake,
     },
   };
 
-  // Optional parameters
   if (args.length > 2 && args[2]) {
-    result.arguments.seed = args[2];
-  }
-
-  if (args.length > 3 && args[3]) {
-    result.arguments.challenge = args[3];
-  }
-
-  if (args.length > 4 && args[4]) {
-    result.arguments.log_path = args[4];
+    result.params.seed = args[2];
   }
 
   return result;

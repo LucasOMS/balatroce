@@ -1,56 +1,53 @@
 import { ChatAction } from "../interfaces/chat-action";
-import { parsePlayOrDiscardAction } from "./play-or-discard.parser";
+import { ActionKeyword } from "../enums/action-keywords.enum";
+import { parsePlayAction, parseDiscardAction } from "./play-or-discard.parser";
 import { parseRearrangeConsumablesAction } from "./rearrange-consumables.parser";
 import { parseRearrangeHandAction } from "./rearrange-hand.parser";
 import { parseSellConsumableAction } from "./sell-consumable.parser";
 import { parseSellJokerAction } from "./sell-joker.parser";
 import { parseShopAction } from "./shop.parser";
-import { parseSkipOrSelectBlindAction } from "./skip-or-select-blind.parser";
+import { parseSelectBlindAction, parseSkipBlindAction } from "./skip-or-select-blind.parser";
 import { parseUseConsumableAction } from "./use-consumable.parser";
 import { parseStartRunAction } from "./start-run.parser";
 import { parseRearrangeJokersAction } from "./rearrange-jokers.parser";
 
+export { ActionKeyword };
+
 export function parseAllParser(msg: string): ChatAction | null {
   const normalized = msg.toLowerCase().trim();
 
-  if (!normalized.startsWith("!")) {
-    return null;
-  }
-
   const action = extractName(normalized);
 
-  switch (action) {
-    case "jouer":
-      return parsePlayOrDiscardAction(normalized, "play_hand");
-    case "selectionner": // If no arguments, it's select blind; if arguments, it's play hand
-      return parseSkipOrSelectBlindAction(normalized, "select");
-    case "retirer":
-      return parsePlayOrDiscardAction(normalized, "discard");
-    case "arranger":
+  switch (action as ActionKeyword) {
+    case ActionKeyword.Play:
+      return parsePlayAction(normalized);
+    case ActionKeyword.SelectBlind:
+      return parseSelectBlindAction(normalized);
+    case ActionKeyword.Discard:
+      return parseDiscardAction(normalized);
+    case ActionKeyword.RearrangeHand:
       return parseRearrangeHandAction(normalized);
-    case "arrangerconso":
+    case ActionKeyword.RearrangeConsumables:
       return parseRearrangeConsumablesAction(normalized);
-    case "arrangerjokers":
+    case ActionKeyword.RearrangeJokers:
       return parseRearrangeJokersAction(normalized);
-    case "vendreconso":
+    case ActionKeyword.SellConsumable:
       return parseSellConsumableAction(normalized);
-    case "vendrejoker":
+    case ActionKeyword.SellJoker:
       return parseSellJokerAction(normalized);
-    case "passer":
-      return parseSkipOrSelectBlindAction(normalized, "skip");
-    case "conso":
+    case ActionKeyword.SkipBlind:
+      return parseSkipBlindAction(normalized);
+    case ActionKeyword.UseConsumable:
       return parseUseConsumableAction(normalized);
-    case "acheter":
+    case ActionKeyword.BuyCard:
       return parseShopAction(normalized, "buy_card");
-    case "acheterutiliser":
-      return parseShopAction(normalized, "buy_and_use_card");
-    case "achetercoupon":
+    case ActionKeyword.BuyVoucher:
       return parseShopAction(normalized, "redeem_voucher");
-    case "quitter":
+    case ActionKeyword.NextRound:
       return parseShopAction(normalized, "next_round");
-    case "changer":
+    case ActionKeyword.Reroll:
       return parseShopAction(normalized, "reroll");
-    case "commencer":
+    case ActionKeyword.StartRun:
       return parseStartRunAction(normalized);
   }
   return null;
@@ -60,10 +57,7 @@ export function parseAllParser(msg: string): ChatAction | null {
  * Extract name of the action (not including !)
  */
 function extractName(input: string): string {
-  // Remove leading "!" if present
   const sanitized = input.startsWith("!") ? input.slice(1) : input;
-
-  // Split by spaces and return the first word
   const words = sanitized.trim().split(/\s+/);
   return words[0] ?? "";
 }

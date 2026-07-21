@@ -1,15 +1,37 @@
-import { BotRequest, BotRequestName } from "../bot-request";
+import { BotRequest, BotMethod } from "../bot-request";
 
-type ShopActionWithIndex = {
-  action: "buy_card" | "buy_and_use_card" | "redeem_voucher";
-  index: number;
-};
+/** Buy a card (joker or consumable) from the shop by 0-based index */
+export interface BuyCardAction extends BotRequest {
+  method: BotMethod.BUY;
+  params: {
+    card: number;
+  };
+}
 
-type SimpleShopAction = {
-  action: "next_round" | "reroll";
-};
+/** Buy a voucher from the shop by 0-based index */
+export interface BuyVoucherAction extends BotRequest {
+  method: BotMethod.BUY;
+  params: {
+    voucher: number;
+  };
+}
 
-export interface ShopAction extends BotRequest {
-  name: BotRequestName.SHOP;
-  arguments: SimpleShopAction | ShopActionWithIndex;
+/** Buy a booster pack from the shop by 0-based index */
+export interface BuyPackAction extends BotRequest {
+  method: BotMethod.BUY;
+  params: {
+    pack: number;
+  };
+}
+
+export type BuyAction = BuyCardAction | BuyVoucherAction | BuyPackAction;
+
+export interface RerollAction extends BotRequest {
+  method: BotMethod.REROLL;
+  params?: Record<string, never>;
+}
+
+export interface NextRoundAction extends BotRequest {
+  method: BotMethod.NEXT_ROUND;
+  params?: Record<string, never>;
 }
