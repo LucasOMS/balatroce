@@ -1,9 +1,3 @@
-// GameCycleState est maintenant défini dans shared/ — re-export pour rétrocompatibilité
-import { GameCycleState } from "../../shared/game-cycle-state";
-export { GameCycleState };
-// Les types de cards/areas restent définis ici (utilisés en interne par NestJS)
-// et sont aussi disponibles dans shared/game-state.ts pour le front Angular.
-
 export enum CardSet {
   DEFAULT = "DEFAULT",
   ENHANCED = "ENHANCED",
@@ -77,7 +71,7 @@ export interface Card {
   cost: CardCost;
 }
 
-/** Represents a card area (hand, jokers, consumables, shop, etc.) */
+/** Représente une zone de cartes (main, jokers, consommables, boutique, etc.) */
 export interface Area {
   count: number;
   limit: number;
@@ -123,7 +117,7 @@ export interface HandInfo {
 }
 
 export interface GameState {
-  state: GameCycleState;
+  state: import("./game-cycle-state").GameCycleState;
   round_num: number;
   ante_num: number;
   money: number;
@@ -141,18 +135,17 @@ export interface GameState {
   };
   jokers: Area;
   consumables: Area;
-  /** Full deck */
+  /** Deck complet */
   cards: Area;
-  /** Cards currently in hand */
+  /** Cartes en main */
   hand: Area;
-  /** Cards and consumables available for purchase in the shop */
+  /** Cartes et consommables disponibles à la boutique */
   shop: Area;
-  /** Vouchers available for purchase in the shop */
+  /** Coupons disponibles à la boutique */
   vouchers: Area;
-  /** Booster packs available for purchase in the shop */
+  /** Boosters disponibles à la boutique */
   packs: Area;
-  /** Currently opened booster pack (null if none open) */
+  /** Booster ouvert en cours (null si aucun) */
   pack: Area | null;
 }
-
 

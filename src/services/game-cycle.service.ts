@@ -10,6 +10,7 @@ import {RearrangeAction} from "../interfaces/actions/rearrange-consumables.actio
 import {UseConsumableAction} from "../interfaces/actions/use-consumable.action";
 import {SellConsumableAction, SellJokerAction} from "../interfaces/actions/sell-consumable.action";
 import {BuyAction} from "../interfaces/actions/shop.action";
+import {OverlaySocketService} from "./overlay-socket.service";
 
 @Injectable()
 export class GameCycleService implements OnModuleInit {
@@ -19,6 +20,8 @@ export class GameCycleService implements OnModuleInit {
     constructor(
         private readonly botService: BotService,
         private readonly logger: Logger,
+        private readonly overlaySocketService: OverlaySocketService,
+
     ) {
     }
 
@@ -239,6 +242,8 @@ export class GameCycleService implements OnModuleInit {
                     break;
             }
         } while (didAutoAction);
+
+        await this.overlaySocketService.update();
 
         this.logger.log("Attente d'une action");
         const action = await firstValueFrom(this.actionsSubject.asObservable());

@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@source "./**/*.{ts,html}";
+
+@theme {
+  /* Espacement de base à 8px (0.5rem) au lieu du défaut 4px (0.25rem) */
+  --spacing: 0.5rem;
+}
+
+
+@font-face {
+  font-family: "M6x11";
+  src: url("/M6x11.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  text-shadow: -1px -1px var(--text-outline-color),
+  -1px 0px var(--text-outline-color),
+  0px -1px var(--text-outline-color),
+  1px 1px var(--text-outline-color),
+  1px 0px var(--text-outline-color),
+  0px 1px var(--text-outline-color);
+  font-family: 'M6x11', sans-serif;
+}
