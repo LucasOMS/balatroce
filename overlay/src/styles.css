@@ -16,11 +16,42 @@
 }
 
 body {
+  font-family: "M6x11", sans-serif;
+}
+
+
+@property --text-outline-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: black;
+}
+
+@utility text-outline-* {
+  --text-outline-color: --value(--color-*);
+}
+
+@utility text-outline-1 {
   text-shadow: -1px -1px var(--text-outline-color),
   -1px 0px var(--text-outline-color),
   0px -1px var(--text-outline-color),
   1px 1px var(--text-outline-color),
   1px 0px var(--text-outline-color),
-  0px 1px var(--text-outline-color);
-  font-family: 'M6x11', sans-serif;
+  0px 1px var(--text-outline-color),
+}
+
+@utility text-outline-2 {
+  text-shadow: -1px -1px var(--text-outline-color),
+  -1px 0px var(--text-outline-color),
+  0px -1px var(--text-outline-color),
+  1px 1px var(--text-outline-color),
+  1px 0px var(--text-outline-color),
+  0px 1px var(--text-outline-color),
+  2px 2px var(--text-outline-color),
+  2px 1px var(--text-outline-color),
+  1px 2px var(--text-outline-color),
+  0px 2px var(--text-outline-color),
+  2px 0px var(--text-outline-color),
+  2px 2px var(--text-outline-color),
+  2px -1px var(--text-outline-color, black),
+  -1px 2px var(--text-outline-color, black);
 }

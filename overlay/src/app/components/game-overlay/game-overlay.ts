@@ -3,7 +3,6 @@ import {OverlaySocket} from "../../services/overlay-socket";
 import {AvailableActions} from "../available-actions/available-actions";
 import {JokerNumbers} from "./joker-numbers/joker-numbers";
 import {CardNumbers} from "./card-numbers/card-numbers";
-import {RemainingCards} from "./remaining-cards/remaining-cards";
 import {ShopCardDescriptions} from "./shop-card-descriptions/shop-card-descriptions";
 import {ShopCardNumbers} from "./shop-card-numbers/shop-card-numbers";
 import {ShopPackNumbers} from "./shop-pack-numbers/shop-pack-numbers";
@@ -17,7 +16,6 @@ import {BlindDescriptions} from './blind-descriptions/blind-descriptions';
     AvailableActions,
     JokerNumbers,
     CardNumbers,
-    RemainingCards,
     ShopCardDescriptions,
     ShopCardNumbers,
     ShopPackNumbers,

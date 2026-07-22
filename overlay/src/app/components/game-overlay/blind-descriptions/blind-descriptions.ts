@@ -1,4 +1,4 @@
-import {Component, effect, input} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {Blind} from '@shared/game-state';
 import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component';
 
@@ -77,10 +77,4 @@ export class BlindDescriptions {
     big: Blind,
     boss: Blind,
   }>()
-
-  constructor() {
-    effect(() => {
-      console.log(this.blinds().small);
-    });
-  }
 }
