@@ -1,8 +1,9 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param, Query } from "@nestjs/common";
 import { BotService } from "src/services/bot.service";
 import { parseAllParser } from "../parsers/parse-all.parser";
 import { ChatAction } from "src/interfaces/chat-action";
 import { GameCycleService } from "../services/game-cycle.service";
+import { BotMethod } from "../interfaces/bot-request";
 
 @Controller()
 export class TestController {
@@ -27,5 +28,63 @@ export class TestController {
     } else {
       console.log("No valid action found");
     }
+  }
+
+  // ── Routes de debug (dev uniquement) ─────────────────────────────────────────
+
+  /**
+   * Modifie directement une valeur de jeu via l'endpoint `set`.
+   * GET /debug/set?field=<champ>&value=<entier>
+   *
+   * Champs supportés : money, chips, ante, round, hands, discards,
+   *                    hand_size, joker_slots, consumable_slots
+   */
+  @Get("debug/set")
+  public async debugSet(
+    @Query("field") field: string,
+    @Query("value") value: string,
+  ): Promise<any> {
+    const num = parseInt(value, 10);
+    if (isNaN(num)) {
+      return { error: `Valeur invalide : "${value}"` };
+    }
+    const allowed = [
+      "money", "chips", "ante", "round", "hands", "discards",
+      "hand_size", "joker_slots", "consumable_slots",
+    ];
+    if (!allowed.includes(field)) {
+      return { error: `Champ inconnu : "${field}". Valeurs possibles : ${allowed.join(", ")}` };
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return await this.botService.debugRaw(BotMethod.SET, { [field]: num });
+  }
+
+  /**
+   * Ajoute une carte par sa clé (joker, consommable, voucher ou carte à jouer).
+   * GET /debug/add/:key
+   *
+   * Exemples de clés :
+   *   Jokers      → j_joker, j_the_duo, j_chaos, ...
+   *   Tarots      → c_magician, c_high_priestess, c_strength, ...
+   *   Spectraux   → c_familiar, c_grim, c_incantation, ...
+   *   Planètes    → c_mercury, c_venus, c_earth, ...
+   *   Vouchers    → v_overstock, v_clearance_sale, ...
+   */
+  @Get("debug/add/:key")
+  public async debugAdd(@Param("key") key: string): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return await this.botService.debugRaw(BotMethod.ADD, { key });
+  }
+
+  /**
+   * Raccourci : définit l'argent directement.
+   * GET /debug/money/:amount
+   */
+  @Get("debug/money/:amount")
+  public async debugMoney(@Param("amount") amount: string): Promise<any> {
+    const num = parseInt(amount, 10);
+    if (isNaN(num) || num < 0) return { error: "Montant invalide" };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return await this.botService.debugRaw(BotMethod.SET, { money: num });
   }
 }

@@ -1,15 +1,15 @@
-import { BuyCardAction, BuyVoucherAction, RerollAction, NextRoundAction } from "../interfaces/actions/shop.action";
+import { BuyCardAction, BuyVoucherAction, BuyPackAction, RerollAction, NextRoundAction } from "../interfaces/actions/shop.action";
 import { extractArguments, getCardIndex } from "./utils/card-utils";
 import { BotMethod } from "../interfaces/bot-request";
 
 /**
  * Parse shop actions
- * Examples: !acheter 1, !achetercoupon 1, !quitter, !changer
+ * Examples: !acheter 1, !achetercoupon 1, !acheterpack 1, !quitter, !changer
  */
 export function parseShopAction(
   input: string,
-  actionType: "buy_card" | "redeem_voucher" | "next_round" | "reroll",
-): BuyCardAction | BuyVoucherAction | RerollAction | NextRoundAction | null {
+  actionType: "buy_card" | "redeem_voucher" | "buy_pack" | "next_round" | "reroll",
+): BuyCardAction | BuyVoucherAction | BuyPackAction | RerollAction | NextRoundAction | null {
   const args = extractArguments(input);
 
   switch (actionType) {
@@ -24,6 +24,12 @@ export function parseShopAction(
       const index = getCardIndex(args[0]);
       if (index === null) return null;
       return { method: BotMethod.BUY, params: { voucher: index } };
+    }
+    case "buy_pack": {
+      if (args.length !== 1) return null;
+      const index = getCardIndex(args[0]);
+      if (index === null) return null;
+      return { method: BotMethod.BUY, params: { pack: index } };
     }
     case "next_round": {
       if (args.length !== 0) return null;

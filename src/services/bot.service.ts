@@ -159,6 +159,11 @@ export class BotService {
         return await this.httpService.sendRequest(msg);
     }
 
+    /** Envoie n'importe quelle requête brute (debug uniquement). */
+    async debugRaw(method: BotMethod, params?: Record<string, unknown>): Promise<any> {
+        return await this.httpService.sendRequest({ method, params });
+    }
+
     public shopActions = {
         buyCard: (index: number) => {
             this.logger.log("Buy card at index :", index);
