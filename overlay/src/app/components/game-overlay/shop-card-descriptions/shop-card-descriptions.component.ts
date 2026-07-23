@@ -6,7 +6,7 @@ import { Card } from "@shared/game-state";
   host: { class: "block" },
   template: `<!-- descriptions des cartes boutique : {{ shopCards().length }} cartes -->`,
 })
-export class ShopCardDescriptions {
+export class ShopCardDescriptionsComponent {
   readonly shopCards = input<Card[]>([]);
 }
 

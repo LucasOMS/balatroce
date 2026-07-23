@@ -558,7 +558,7 @@ import {Area} from "@shared/game-state";
 
   `
 })
-export class CardNumbers {
+export class CardNumbersComponent {
   readonly hand = input<Area | null>(null);
 
   protected readonly count = computed(() => this.hand()?.count ?? 0);

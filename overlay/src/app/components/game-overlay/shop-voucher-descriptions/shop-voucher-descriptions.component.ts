@@ -28,7 +28,7 @@ import {Area} from "@shared/game-state";
     }
   `
 })
-export class ShopVoucherDescriptions {
+export class ShopVoucherDescriptionsComponent {
   readonly vouchers = input.required<Area>();
 
   protected readonly count = computed(() => this.vouchers().count ?? 0);

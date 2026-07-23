@@ -1,36 +1,36 @@
 import {Component, computed, ElementRef, inject, signal, viewChild} from "@angular/core";
 import {OverlaySocket} from "../../services/overlay-socket";
-import {AvailableActions} from "../available-actions/available-actions";
-import {JokerNumbers} from "./joker-numbers/joker-numbers";
-import {CardNumbers} from "./card-numbers/card-numbers";
-import {ShopCardDescriptions} from "./shop-card-descriptions/shop-card-descriptions";
-import {ShopCardNumbers} from "./shop-card-numbers/shop-card-numbers";
-import {ShopPackNumbers} from "./shop-pack-numbers/shop-pack-numbers";
-import {ShopVoucherDescriptions} from "./shop-voucher-descriptions/shop-voucher-descriptions";
+import {AvailableActionsComponent} from "../available-actions/available-actions.component";
+import {JokerNumbersComponent} from "./joker-numbers/joker-numbers.component";
+import {CardNumbersComponent} from "./card-numbers/card-numbers.component";
+import {ShopCardDescriptionsComponent} from "./shop-card-descriptions/shop-card-descriptions.component";
+import {ShopCardNumbersComponent} from "./shop-card-numbers/shop-card-numbers.component";
+import {ShopPackNumbersComponent} from "./shop-pack-numbers/shop-pack-numbers.component";
+import {ShopVoucherDescriptionsComponent} from "./shop-voucher-descriptions/shop-voucher-descriptions.component";
 import {GameCycleState} from '@shared/game-cycle-state';
-import {BlindDescriptions} from './blind-descriptions/blind-descriptions';
+import {BlindDescriptionsComponent} from './blind-descriptions/blind-descriptions.component';
 import {ConsumableNumbersComponent} from './consumable-numbers/consumable-numbers.component';
-import {ShopVoucherNumbers} from './shop-voucher-numbers/shop-voucher-numbers';
-import {ShopPackDescriptions} from './shop-pack-descriptions/shop-pack-descriptions';
+import {ShopVoucherNumbersComponent} from './shop-voucher-numbers/shop-voucher-numbers.component';
+import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-descriptions.component';
 
 @Component({
   selector: "app-game-overlay",
   imports: [
-    AvailableActions,
-    JokerNumbers,
-    CardNumbers,
-    ShopCardDescriptions,
-    ShopCardNumbers,
-    ShopPackNumbers,
-    ShopVoucherDescriptions,
-    BlindDescriptions,
+    AvailableActionsComponent,
+    JokerNumbersComponent,
+    CardNumbersComponent,
+    ShopCardDescriptionsComponent,
+    ShopCardNumbersComponent,
+    ShopPackNumbersComponent,
+    ShopVoucherDescriptionsComponent,
+    BlindDescriptionsComponent,
     ConsumableNumbersComponent,
-    ShopVoucherNumbers,
-    ShopPackDescriptions,
+    ShopVoucherNumbersComponent,
+    ShopPackDescriptionsComponent,
   ],
-  templateUrl: "./game-overlay.html",
+  templateUrl: "./game-overlay.component.html",
 })
-export class GameOverlay {
+export class GameOverlayComponent {
   private readonly overlaySocket = inject(OverlaySocket);
 
   protected readonly captureVideoRef = viewChild<ElementRef<HTMLVideoElement>>("captureVideo");

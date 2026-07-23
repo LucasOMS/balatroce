@@ -51,7 +51,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
 
   `,
 })
-export class AvailableActions {
+export class AvailableActionsComponent {
   readonly actions = input<ActionKeyword[]>([]);
 
   public readonly displayedActions = computed<Action[]>(() => this.actions().map(action => actionsMetadata[action]));

@@ -67,7 +67,7 @@ import {Area} from "@shared/game-state";
     }
   `
 })
-export class ShopPackNumbers {
+export class ShopPackNumbersComponent {
   readonly packs = input.required<Area>();
 
   protected readonly count = computed(() => this.packs().count ?? 0);

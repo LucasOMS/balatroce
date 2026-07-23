@@ -355,7 +355,7 @@ import {Area} from "@shared/game-state";
 
   `
 })
-export class JokerNumbers {
+export class JokerNumbersComponent {
   readonly jokers = input<Area | null>(null);
 
   protected readonly count = computed(() => this.jokers()?.count ?? 0);

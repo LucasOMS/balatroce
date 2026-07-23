@@ -71,7 +71,7 @@ import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component'
     }
   `
 })
-export class BlindDescriptions {
+export class BlindDescriptionsComponent {
   public readonly blinds = input.required<{
     small: Blind,
     big: Blind,
