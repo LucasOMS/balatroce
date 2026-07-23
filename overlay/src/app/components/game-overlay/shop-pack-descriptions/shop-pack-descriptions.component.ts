@@ -19,15 +19,6 @@ import {Area} from "@shared/game-state";
   `,
 
   styles: `
-    .voucher-number {
-      font-size: 60px;
-      color: white;
-      position: absolute;
-      height: 70px;
-      display: grid;
-      place-content: center;
-    }
-
     .error-message {
       position: absolute;
       bottom: 280px;

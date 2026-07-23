@@ -5,7 +5,7 @@ import {Area} from "@shared/game-state";
   selector: "app-consumable-numbers",
   host: {class: "block"},
   template: `
-    @if (count() <= 4) {
+    @if (count() <= 4 && count() > 0) {
       <div class="consumable-count-{{ count() }}">
         @for (num of numbers(); track num) {
           <div class="consumable-number text-outline-2">

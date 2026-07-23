@@ -13,10 +13,6 @@ import {Area} from "@shared/game-state";
           </div>
         }
       </div>
-    } @else {
-      <div class="error-message text-outline-2">
-        Vous avez cassé le jeu au delà de nos attentes.<br>Vous allez devoir compter les cartes
-      </div>
     }
   `,
 

@@ -12,6 +12,7 @@ import {BlindDescriptionsComponent} from './blind-descriptions/blind-description
 import {ConsumableNumbersComponent} from './consumable-numbers/consumable-numbers.component';
 import {ShopVoucherNumbersComponent} from './shop-voucher-numbers/shop-voucher-numbers.component';
 import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-descriptions.component';
+import {ConsumableDescriptionsComponent} from './consumable-descriptions/consumable-descriptions.component';
 
 @Component({
   selector: "app-game-overlay",
@@ -27,6 +28,7 @@ import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-
     ConsumableNumbersComponent,
     ShopVoucherNumbersComponent,
     ShopPackDescriptionsComponent,
+    ConsumableDescriptionsComponent,
   ],
   templateUrl: "./game-overlay.component.html",
 })

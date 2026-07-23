@@ -6,6 +6,7 @@ import {
   ElementRef,
   input,
   NgZone,
+  numberAttribute,
   viewChild,
 } from '@angular/core';
 
@@ -49,9 +50,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AutoFitTextComponent {
-  static readonly MIN_FONT_SIZE = 10;
-
-  readonly baseFontSize = input(24);
+  readonly minFontSize = input(14, {transform: numberAttribute});
+  readonly baseFontSize = input(24, {transform: numberAttribute});
 
   private readonly container =
     viewChild.required<ElementRef<HTMLDivElement>>('container');
@@ -123,7 +123,7 @@ export class AutoFitTextComponent {
     content.style.wordBreak = 'normal';
     content.style.overflowWrap = 'normal';
 
-    let low = AutoFitTextComponent.MIN_FONT_SIZE;
+    let low = this.minFontSize();
     let high = this.baseFontSize();
     let best = low;
 
@@ -147,7 +147,7 @@ export class AutoFitTextComponent {
     }
 
     content.style.fontSize =
-      `${AutoFitTextComponent.MIN_FONT_SIZE}px`;
+      `${this.minFontSize()}px`;
 
     content.style.overflowWrap = 'break-word';
 
