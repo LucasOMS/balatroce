@@ -36,3 +36,12 @@ export function parsePackAction(input: string): PackAction | null {
   return { method: BotMethod.PACK, params: { card: cardIndex, targets: targetIndexes } };
 }
 
+/**
+ * Parse pack skip action.
+ *
+ * Format:
+ *   passerpack  → skip pack (sans prendre de carte)
+ */
+export function parsePackSkipAction(): PackAction {
+  return { method: BotMethod.PACK, params: { skip: true } };
+}

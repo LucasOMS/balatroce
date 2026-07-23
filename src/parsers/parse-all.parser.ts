@@ -10,7 +10,7 @@ import { parseSelectBlindAction, parseSkipBlindAction } from "./skip-or-select-b
 import { parseUseConsumableAction } from "./use-consumable.parser";
 import { parseStartRunAction } from "./start-run.parser";
 import { parseRearrangeJokersAction } from "./rearrange-jokers.parser";
-import { parsePackAction } from "./pack.parser";
+import { parsePackAction, parsePackSkipAction } from "./pack.parser";
 
 export { ActionKeyword };
 
@@ -48,6 +48,8 @@ export function parseAllParser(msg: string): ChatAction | null {
       return parseShopAction(normalized, "buy_pack");
     case ActionKeyword.PackSelect:
       return parsePackAction(normalized);
+    case ActionKeyword.PackSkip:
+      return parsePackSkipAction();
     case ActionKeyword.NextRound:
       return parseShopAction(normalized, "next_round");
     case ActionKeyword.Reroll:

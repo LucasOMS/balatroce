@@ -84,6 +84,7 @@ export class OverlayService {
             case GameCycleState.SMODS_BOOSTER_OPENED:
                 res = [
                     ActionKeyword.PackSelect,
+                    ActionKeyword.PackSkip,
                     ...jokerActions,
                     ...consumableActions,
                 ];

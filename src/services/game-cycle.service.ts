@@ -21,7 +21,6 @@ export class GameCycleService implements OnModuleInit {
         private readonly botService: BotService,
         private readonly logger: Logger,
         private readonly overlaySocketService: OverlaySocketService,
-
     ) {
     }
 
@@ -241,6 +240,7 @@ export class GameCycleService implements OnModuleInit {
                     didAutoAction = true;
                     break;
             }
+            console.log('New game cycle state : ', this.currentGameState.state);
         } while (didAutoAction);
 
         await this.overlaySocketService.update();
@@ -248,6 +248,9 @@ export class GameCycleService implements OnModuleInit {
         this.logger.log("Attente d'une action");
         const action = await firstValueFrom(this.actionsSubject.asObservable());
         await this.botService.useRaw(action);
+
+        this.currentGameState = await this.botService.getCurrentState();
+        console.log('New game cycle state : ', this.currentGameState.state);
 
         await this.nextStep();
     }

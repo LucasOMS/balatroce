@@ -13,9 +13,11 @@ export enum ActionKeyword {
   BuyVoucher = "achetercoupon",
   BuyPack = "acheterpack",
   PackSelect = "prendrepack",
+  PackSkip = "passerpack",
   NextRound = "quitter",
   Reroll = "changer",
   StartRun = "commencer",
 }
+
 
 

@@ -30,6 +30,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
   [ActionKeyword.BuyVoucher]: {description: 'Acheter un coupon', example: `${ActionKeyword.BuyVoucher} 1`},
   [ActionKeyword.BuyPack]: {description: 'Acheter un pack', example: `${ActionKeyword.BuyPack} 1`},
   [ActionKeyword.PackSelect]: {description: 'Sélectionner dans le pack', example: `${ActionKeyword.PackSelect} 1`},
+  [ActionKeyword.PackSkip]: {description: 'Passer le pack', example: `${ActionKeyword.PackSkip}`},
   [ActionKeyword.NextRound]: {description: 'Passer', example: `${ActionKeyword.NextRound}`},
   [ActionKeyword.Reroll]: {description: 'Relancer le magasin', example: `${ActionKeyword.Reroll}`},
   [ActionKeyword.StartRun]: {description: 'Commencer une partie', example: `${ActionKeyword.StartRun} WHITE RED`}
