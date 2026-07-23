@@ -1,0 +1,137 @@
+import {Component, computed, input} from "@angular/core";
+import {Area} from "@shared/game-state";
+
+@Component({
+  selector: "app-consumable-numbers",
+  host: {class: "block"},
+  template: `
+    @if (count() <= 4) {
+      <div class="consumable-count-{{ count() }}">
+        @for (num of numbers(); track num) {
+          <div class="consumable-number text-outline-2">
+            <span>{{ num }}</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="error-message text-outline-2">
+        Vous avez cassé le jeu au delà de nos attentes.<br>Vous allez devoir compter les cartes
+      </div>
+    }
+  `,
+
+  styles: `
+    .consumable-number {
+      font-size: 60px;
+      color: white;
+      position: absolute;
+      height: 70px;
+      display: grid;
+      place-content: center;
+    }
+
+    .error-message {
+      position: absolute;
+      top: 280px;
+      left: 598px;
+      color: white;
+      font-size: 26px;
+      text-align: center;
+      line-height: 28px;
+      width: 672px;
+    }
+
+    :host > * {
+      & > * {
+        width: 147px;
+      }
+
+      & > :last-child {
+        width: 147px !important;
+      }
+    }
+
+    .consumable-count-1 {
+      > :nth-child(1) {
+        top: 275px;
+        left: 1505px;
+      }
+    }
+
+    .consumable-count-2 {
+      > :nth-child(1) {
+        top: 273px;
+        left: 1398px;
+        rotate: -2deg;
+      }
+
+      > :nth-child(2) {
+        top: 273px;
+        left: 1612px;
+        rotate: 2deg;
+      }
+    }
+
+    .consumable-count-3 {
+      > * {
+        width: 110px;
+      }
+
+      > :nth-child(1) {
+        top: 273px;
+        left: 1399px;
+        rotate: -2deg;
+      }
+
+      > :nth-child(2) {
+        top: 273px;
+        left: 1510px;
+      }
+
+      > :nth-child(3) {
+        top: 274px;
+        left: 1613px;
+        rotate: 3deg;
+      }
+    }
+
+    .consumable-count-4 {
+      > * {
+        width: 75px;
+      }
+
+      > :nth-child(1) {
+        top: 275px;
+        left: 1400px;
+        rotate: -3deg;
+      }
+
+      > :nth-child(2) {
+        top: 274px;
+        left: 1471px;
+        rotate: -1deg;
+      }
+
+      > :nth-child(3) {
+        top: 274px;
+        left: 1544px;
+        rotate: 1deg;
+      }
+
+      > :nth-child(4) {
+        top: 273px;
+        left: 1611px;
+        rotate: 2deg;
+      }
+    }
+  `
+})
+export class ConsumableNumbersComponent {
+  readonly consumables = input<Area | null>(null);
+
+  protected readonly count = computed(() => this.consumables()?.count ?? 0);
+  protected readonly limit = computed(() => this.consumables()?.limit ?? 0);
+
+  protected readonly numbers = computed<number[]>(() => Array.from({length: this.count()}).map((_, i) => i + 1));
+}
+

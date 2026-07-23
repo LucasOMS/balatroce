@@ -33,13 +33,18 @@
 
     <!-- Composants toujours visibles -->
     <app-available-actions
-      class="absolute z-10 top-0 left-0 w-full h-full"
+      class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
       [actions]="availableActions()"
     />
 
     <app-joker-numbers
-      class="absolute z-10 top-0 left-0 w-full h-full"
+      class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
       [jokers]="state.jokers"
+    />
+
+    <app-consumable-numbers
+      class="absolute z-10 top-0 left-0 w-full h-full"
+      [consumables]="state.consumables"
     />
 
     <!-- Sélection des blinds -->

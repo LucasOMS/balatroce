@@ -9,6 +9,7 @@ import {ShopPackNumbers} from "./shop-pack-numbers/shop-pack-numbers";
 import {ShopVoucherNumbers} from "./shop-voucher-numbers/shop-voucher-numbers";
 import {GameCycleState} from '@shared/game-cycle-state';
 import {BlindDescriptions} from './blind-descriptions/blind-descriptions';
+import {ConsumableNumbersComponent} from './consumable-numbers/consumable-numbers.component';
 
 @Component({
   selector: "app-game-overlay",
@@ -21,6 +22,7 @@ import {BlindDescriptions} from './blind-descriptions/blind-descriptions';
     ShopPackNumbers,
     ShopVoucherNumbers,
     BlindDescriptions,
+    ConsumableNumbersComponent,
   ],
   templateUrl: "./game-overlay.html",
 })
