@@ -74,13 +74,27 @@
         [shop]="state.shop"
       />
 
-      <app-shop-pack-numbers
-        class="absolute z-10 top-0 left-0 w-full h-full"
-        [packs]="state.packs"
-      />
+      @if (state.packs) {
+        <app-shop-pack-numbers
+          class="absolute z-10 top-0 left-0 w-full h-full"
+          [packs]="state.packs"
+        />
+
+        <app-shop-pack-descriptions
+          class="absolute z-10 top-0 left-0 w-full h-full"
+          [packs]="state.packs"
+        />
+      }
+
+
 
       <app-shop-voucher-numbers
-        class="absolute z-10 top-0 left-0 w-full h-full"
+        class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
+        [vouchers]="state.vouchers"
+      />
+
+      <app-shop-voucher-descriptions
+        class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
         [vouchers]="state.vouchers"
       />
     }

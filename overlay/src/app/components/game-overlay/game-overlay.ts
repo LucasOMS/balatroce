@@ -6,10 +6,12 @@ import {CardNumbers} from "./card-numbers/card-numbers";
 import {ShopCardDescriptions} from "./shop-card-descriptions/shop-card-descriptions";
 import {ShopCardNumbers} from "./shop-card-numbers/shop-card-numbers";
 import {ShopPackNumbers} from "./shop-pack-numbers/shop-pack-numbers";
-import {ShopVoucherNumbers} from "./shop-voucher-numbers/shop-voucher-numbers";
+import {ShopVoucherDescriptions} from "./shop-voucher-descriptions/shop-voucher-descriptions";
 import {GameCycleState} from '@shared/game-cycle-state';
 import {BlindDescriptions} from './blind-descriptions/blind-descriptions';
 import {ConsumableNumbersComponent} from './consumable-numbers/consumable-numbers.component';
+import {ShopVoucherNumbers} from './shop-voucher-numbers/shop-voucher-numbers';
+import {ShopPackDescriptions} from './shop-pack-descriptions/shop-pack-descriptions';
 
 @Component({
   selector: "app-game-overlay",
@@ -20,9 +22,11 @@ import {ConsumableNumbersComponent} from './consumable-numbers/consumable-number
     ShopCardDescriptions,
     ShopCardNumbers,
     ShopPackNumbers,
-    ShopVoucherNumbers,
+    ShopVoucherDescriptions,
     BlindDescriptions,
     ConsumableNumbersComponent,
+    ShopVoucherNumbers,
+    ShopPackDescriptions,
   ],
   templateUrl: "./game-overlay.html",
 })
