@@ -5,13 +5,21 @@ import {Area} from "@shared/game-state";
   selector: "app-card-numbers",
   host: {class: "block"},
   template: `
-    <div class="card-count-{{ count() }}">
-      @for (num of numbers(); track num) {
-        <div class="card-number text-outline-2">
-          <span>{{ num }}</span>
-        </div>
-      }
-    </div>
+
+    @if (count() <= 12) {
+      <div class="card-count-{{ count() }}">
+        @for (num of numbers(); track num) {
+          <div class="card-number text-outline-2">
+            <span>{{ num }}</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="error-message">
+        Vous avez cassé le jeu au delà de nos attente.<br>Vous allez devoir compter les cartes
+      </div>
+    }
+
   `,
 
   styles: `
@@ -24,11 +32,17 @@ import {Area} from "@shared/game-state";
       place-content: center;
     }
 
-    .card-count-1 {
-      > * {
+    :host > * {
+      & > * {
         width: 161px;
       }
 
+      & > :last-child {
+        width: 161px !important;
+      }
+    }
+
+    .card-count-1 {
       > :nth-child(1) {
         bottom: 452px;
         left: 532px;
@@ -36,10 +50,6 @@ import {Area} from "@shared/game-state";
     }
 
     .card-count-2 {
-      > * {
-        width: 161px;
-      }
-
       > :nth-child(1) {
         bottom: 443px;
         left: 526px;
@@ -54,10 +64,6 @@ import {Area} from "@shared/game-state";
     }
 
     .card-count-3 {
-      > * {
-        width: 161px;
-      }
-
       > :nth-child(1) {
         bottom: 443px;
         left: 526px;
@@ -77,10 +83,6 @@ import {Area} from "@shared/game-state";
     }
 
     .card-count-4 {
-      > * {
-        width: 161px;
-      }
-
       > :nth-child(1) {
         bottom: 443px;
         left: 526px;
@@ -107,10 +109,6 @@ import {Area} from "@shared/game-state";
     }
 
     .card-count-5 {
-      > * {
-        width: 161px;
-      }
-
       > :nth-child(1) {
         bottom: 437px;
         left: 521px;
@@ -143,10 +141,6 @@ import {Area} from "@shared/game-state";
     }
 
     .card-count-6 {
-      > * {
-        width: 161px;
-      }
-
       > :nth-child(1) {
         bottom: 437px;
         left: 521px;
@@ -226,7 +220,6 @@ import {Area} from "@shared/game-state";
       }
 
       > :nth-child(7) {
-        width: 161px;
         bottom: 435px;
         left: 1408px;
         rotate: 5deg;
@@ -281,7 +274,6 @@ import {Area} from "@shared/game-state";
       }
 
       > :nth-child(8) {
-        width: 161px;
         bottom: 433px;
         left: 1408px;
         rotate: 5deg;
@@ -342,7 +334,6 @@ import {Area} from "@shared/game-state";
       }
 
       > :nth-child(9) {
-        width: 161px;
         bottom: 433px;
         left: 1408px;
         rotate: 5deg;
@@ -409,7 +400,6 @@ import {Area} from "@shared/game-state";
       }
 
       > :nth-child(10) {
-        width: 161px;
         bottom: 433px;
         left: 1410px;
         rotate: 5deg;
@@ -482,7 +472,6 @@ import {Area} from "@shared/game-state";
       }
 
       > :nth-child(11) {
-        width: 161px;
         bottom: 433px;
         left: 1410px;
         rotate: 5deg;
@@ -561,7 +550,6 @@ import {Area} from "@shared/game-state";
       }
 
       > :nth-child(12) {
-        width: 161px;
         bottom: 433px;
         left: 1410px;
         rotate: 5deg;

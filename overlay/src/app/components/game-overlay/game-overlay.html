@@ -52,7 +52,7 @@
     <!-- Pendant la manche -->
     @if (gameCycleState === GameCycleState.SELECTING_HAND) {
       <app-card-numbers
-        class="absolute z-10 top-0 left-0 w-full h-full"
+        class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
         [hand]="state.hand"
       />
     }
