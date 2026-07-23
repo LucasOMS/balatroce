@@ -27,7 +27,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
   [ActionKeyword.SkipBlind]: {description: 'Passer la blinde', example: `${ActionKeyword.SkipBlind}`},
   [ActionKeyword.UseConsumable]: {description: 'Utiliser un consommable', example: `${ActionKeyword.UseConsumable} 1`},
   [ActionKeyword.BuyCard]: {description: 'Acheter une carte', example: `${ActionKeyword.BuyCard} 2`},
-  [ActionKeyword.BuyVoucher]: {description: 'Acheter un bon', example: `${ActionKeyword.BuyVoucher} 1`},
+  [ActionKeyword.BuyVoucher]: {description: 'Acheter un coupon', example: `${ActionKeyword.BuyVoucher} 1`},
   [ActionKeyword.BuyPack]: {description: 'Acheter un pack', example: `${ActionKeyword.BuyPack} 1`},
   [ActionKeyword.PackSelect]: {description: 'Sélectionner dans le pack', example: `${ActionKeyword.PackSelect} 1`},
   [ActionKeyword.NextRound]: {description: 'Passer', example: `${ActionKeyword.NextRound}`},
