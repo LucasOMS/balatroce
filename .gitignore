@@ -42,9 +42,6 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
-# Twitch OAuth token (généré via /auth/twitch/login, ne doit jamais être commit)
-twitch-auth.json
-
 # temp directory
 .temp
 .tmp

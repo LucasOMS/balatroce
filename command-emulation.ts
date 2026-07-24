@@ -54,8 +54,6 @@ function printHelp(): void {
     console.log("  mode admin        → exécute directement les commandes (défaut)");
     console.log("  mode twitch       → simule des messages du chat Twitch (entre dans le vote)");
     console.log("  user <pseudo>     → change l'utilisateur simulé en mode twitch");
-    console.log("  twitchstatus      → affiche si un compte Twitch est authentifié");
-    console.log(`                      (sinon, ouvrez ${BASE_URL}/auth/twitch/login dans un navigateur)`);
 
     console.log("\n── Commandes de debug ─────────────────────────────────");
     console.log("  debug set <champ> <valeur>");
@@ -82,20 +80,6 @@ async function getState(): Promise<void> {
         console.log(JSON.stringify(data, null, 2));
     } catch (e: unknown) {
         console.error(`❌ Erreur état : ${(e as Error).message}`);
-    }
-}
-
-async function getTwitchStatus(): Promise<void> {
-    try {
-        const res = await fetch(`${BASE_URL}/auth/twitch/status`);
-        const data = (await res.json()) as { authenticated: boolean; username: string | null };
-        if (data.authenticated) {
-            console.log(`✅ Authentifié sur Twitch en tant que "${data.username ?? "?"}"`);
-        } else {
-            console.log(`⚠️  Non authentifié. Ouvrez ${BASE_URL}/auth/twitch/login dans un navigateur.`);
-        }
-    } catch (e: unknown) {
-        console.error(`❌ Erreur réseau : ${(e as Error).message}`);
     }
 }
 
@@ -240,8 +224,6 @@ function startRepl(): void {
                     printHelp();
                 } else if (trimmed === "etat" || trimmed === "state") {
                     await getState();
-                } else if (trimmed === "twitchstatus") {
-                    await getTwitchStatus();
                 } else if (trimmed.toLowerCase().startsWith("mode")) {
                     const parts = trimmed.split(/\s+/);
                     const newMode = parts[1]?.toLowerCase();

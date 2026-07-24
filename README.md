@@ -188,8 +188,11 @@ Le projet permet de piloter Balatro en laissant les viewers Twitch voter pour l'
 
 ### Fonctionnement
 
-1. **`TwitchMessageCollectorService`** se connecte au chat Twitch (via [tmi.js](https://github.com/tmijs/tmi.js)) et
-   enregistre le dernier message (en minuscules) de chaque utilisateur qui commence par un mot-clé d'action valide.
+1. **`TwitchMessageCollectorService`** se connecte anonymement, en lecture seule, au chat Twitch (via
+   [tmi.js](https://github.com/tmijs/tmi.js)) et enregistre le dernier message (en minuscules) de chaque utilisateur
+   qui commence par un mot-clé d'action valide. Twitch autorise la lecture du chat IRC sans authentification (identité
+   `justinfan...`) : comme ce service ne fait que lire (jamais écrire), aucun compte ni token Twitch n'est nécessaire.
+   La connexion se reconnecte automatiquement en cas de coupure (backoff exponentiel géré par tmi.js).
 2. **`TwitchActionDeciderService`** maintient un timer de vote. À la fin de la période de vote, il unifie les messages
    équivalents (ex: `!jouer 2 1 3` et `!jouer 1 2 3` comptent comme la même action), calcule le nombre de votes par
    action, puis utilise une stratégie pour décider de l'ordre de préférence des actions :
@@ -202,52 +205,20 @@ Le projet permet de piloter Balatro en laissant les viewers Twitch voter pour l'
 
 ### Variables d'environnement
 
-| Variable                  | Description                                                             | Défaut                                       |
-|----------------------------|--------------------------------------------------------------------------|----------------------------------------------|
-| `TWITCH_CHANNEL`           | Nom de la chaîne Twitch à écouter (sans le `#`)                          | _(aucun)_                                    |
-| `TWITCH_CLIENT_ID`         | Client ID de l'application Twitch (voir "Authentification" ci-dessous)   | _(aucun)_                                    |
-| `TWITCH_CLIENT_SECRET`     | Client Secret de la même application Twitch                              | _(aucun)_                                    |
-| `TWITCH_REDIRECT_URI`      | URL de callback OAuth, doit être enregistrée dans l'application Twitch   | `http://localhost:3000/auth/twitch/callback` |
-| `TWITCH_MOCK`              | Si `true`, désactive la connexion Twitch réelle (voir section debug)     | `false`                                      |
-| `TWITCH_VOTE_DURATION_MS`  | Durée (ms) de la période de vote                                         | `20000`                                      |
-| `TWITCH_VOTE_DELAY_MS`     | Durée (ms) du délai entre deux votes (messages "en retard")              | `5000`                                       |
-| `TWITCH_VOTE_STRATEGY`     | Stratégie de décision : `democracy` ou `anarchy`                         | `democracy`                                  |
+| Variable                  | Description                                                             | Défaut       |
+|----------------------------|--------------------------------------------------------------------------|--------------|
+| `TWITCH_CHANNEL`           | Nom de la chaîne Twitch à écouter (sans le `#`)                          | _(aucun)_    |
+| `TWITCH_MOCK`              | Si `true`, désactive la connexion Twitch réelle (voir section debug)     | `false`      |
+| `TWITCH_VOTE_DURATION_MS`  | Durée (ms) de la période de vote                                         | `20000`      |
+| `TWITCH_VOTE_DELAY_MS`     | Durée (ms) du délai entre deux votes (messages "en retard")              | `5000`       |
+| `TWITCH_VOTE_STRATEGY`     | Stratégie de décision : `democracy` ou `anarchy`                         | `democracy`  |
 
 Ces variables peuvent être définies dans votre shell, ou via un fichier `.env` chargé au démarrage avec
 `node --env-file=.env` (Node 20+).
 
-> ⚠️ Le pseudo et le token OAuth du compte qui va parler dans le chat **ne sont pas** des variables d'environnement :
-> ils sont récupérés via le flow d'authentification ci-dessous et stockés dans le fichier `twitch-auth.json`
-> (déjà ignoré par git).
-
-### Authentification Twitch (récupérer le token OAuth)
-
-1. Créez une application sur la [console développeur Twitch](https://dev.twitch.tv/console/apps) :
-   - **Nom** : ce que vous voulez (ex: `balatroce`)
-   - **OAuth Redirect URLs** : `http://localhost:3000/auth/twitch/callback` (ou la valeur de `TWITCH_REDIRECT_URI`)
-   - **Category** : Chat Bot
-   - Récupérez le **Client ID**, et générez un **Client Secret**
-2. Renseignez `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` dans votre environnement.
-3. Démarrez le serveur (`npm run start:dev`), puis ouvrez dans un navigateur :
-
-   ```
-   http://localhost:3000/auth/twitch/login
-   ```
-
-4. Connectez-vous avec le compte Twitch qui doit parler dans le chat (peut être votre propre compte, ou un compte
-   bot dédié), puis autorisez l'application.
-5. Vous êtes redirigé vers `/auth/twitch/callback`, qui affiche une page de confirmation et enregistre le token dans
-   `twitch-auth.json` à la racine du projet. Redémarrez le serveur si celui-ci tournait déjà pendant l'authentification.
-
-Vous pouvez vérifier l'état de l'authentification à tout moment :
-
-```bash
-curl http://localhost:3000/auth/twitch/status
-# { "authenticated": true, "username": "monpseudo" }
-```
-
-Si le token expire, `TwitchMessageCollectorService` tente automatiquement de le rafraîchir grâce au refresh token
-stocké dans le même fichier. Si le rafraîchissement échoue, ré-ouvrez simplement `/auth/twitch/login`.
+> ℹ️ Aucune authentification Twitch n'est nécessaire : la lecture du chat se fait de manière anonyme. Si un jour le
+> bot doit aussi **écrire** dans le chat (ex: annoncer l'action jouée), une authentification OAuth redeviendra
+> nécessaire pour ce cas d'usage précis.
 
 ### Tester en local sans Twitch (mode mock)
 

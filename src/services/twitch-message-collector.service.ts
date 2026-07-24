@@ -3,20 +3,20 @@ import {Subject} from "rxjs";
 import {auditTime} from "rxjs/operators";
 import * as tmi from "tmi.js";
 import {isActionMessage} from "../parsers/parse-all.parser";
-import {TwitchAuthService} from "./twitch-auth.service";
 
 /**
- * Se connecte au chat Twitch et enregistre le dernier message (en lowercase)
- * de chaque utilisateur qui commence par un ActionKeyword.
+ * Se connecte anonymement en lecture seule au chat Twitch et enregistre le
+ * dernier message (en lowercase) de chaque utilisateur qui commence par un
+ * ActionKeyword.
+ *
+ * Twitch autorise la lecture du chat IRC sans authentification (connexion
+ * "justinfan"). Comme ce service ne fait que lire les messages (jamais en
+ * envoyer), aucune authentification OAuth n'est nécessaire.
  *
  * Variables d'environnement :
  * - TWITCH_MOCK : si "true", ne se connecte pas réellement à Twitch (utile en dev/tests,
  *   les messages peuvent alors être injectés via TestController)
  * - TWITCH_CHANNEL : nom de la chaîne Twitch à écouter (sans le #)
- *
- * L'authentification (pseudo + token OAuth) n'est PAS lue depuis des
- * variables d'environnement : elle est stockée dans `twitch-auth.json` par
- * TwitchAuthService, obtenu en visitant GET /auth/twitch/login.
  */
 @Injectable()
 export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDestroy {
@@ -29,9 +29,6 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
     private readonly newMessageSubject = new Subject<void>();
     /** Émet à chaque fois que de nouveaux messages ont été enregistrés (max 1 fois / seconde) */
     public readonly newMessages$ = this.newMessageSubject.pipe(auditTime(1000));
-
-    constructor(private readonly twitchAuthService: TwitchAuthService) {
-    }
 
     public async onModuleInit(): Promise<void> {
         if (process.env.TWITCH_MOCK === "true") {
@@ -46,25 +43,30 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
             throw new Error("TWITCH_CHANNEL non défini : impossible de se connecter au chat Twitch.");
         }
 
-        if (!this.twitchAuthService.isAuthenticated()) {
-            const port = process.env.PORT ?? "3000";
-            throw new Error(`Aucun token Twitch enregistré. Ouvrez http://localhost:${port}/auth/twitch/login dans un navigateur pour vous authentifier, puis redémarrez le serveur.`);
-        }
-
-        await this.connect(channel);
+        this.setupClient(channel);
+        await this.connect();
     }
 
     public async onModuleDestroy(): Promise<void> {
         await this.client?.disconnect();
     }
 
-    private async connect(channel: string, isRetry = false): Promise<void> {
-        const username = this.twitchAuthService.getUsername();
-        const accessToken = this.twitchAuthService.getAccessToken();
-
+    /**
+     * Crée le client tmi.js en lecture anonyme, avec reconnexion automatique
+     * gérée nativement par tmi.js (backoff exponentiel jusqu'à 30s, tentatives
+     * infinies), et branche les listeners de cycle de vie de la connexion.
+     */
+    private setupClient(channel: string): void {
         this.client = new tmi.Client({
             options: {debug: false},
-            identity: username && accessToken ? {username, password: `oauth:${accessToken}`} : undefined,
+            connection: {
+                reconnect: true,
+                secure: true,
+                reconnectDecay: 1.5,
+                reconnectInterval: 1000,
+                maxReconnectInterval: 30000,
+                maxReconnectAttempts: Infinity,
+            },
             channels: [channel],
         });
 
@@ -73,23 +75,42 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
             this.registerMessage(author, message);
         });
 
-        try {
-            await this.client.connect();
-            this.logger.log(`Connecté au chat Twitch : #${channel} (compte ${username ?? "?"})`);
-        } catch (err) {
-            this.logger.error(`Impossible de se connecter au chat Twitch : ${(err as Error).message}`);
+        this.client.on("connected", (address, port) => {
+            this.logger.log(`Connecté au chat Twitch #${channel} (${address}:${port.toString()}, anonyme)`);
+        });
 
-            if (!isRetry) {
-                this.logger.warn("Tentative de rafraîchissement du token Twitch...");
-                const refreshed = await this.twitchAuthService.refresh();
-                if (refreshed) {
-                    this.logger.log("Token rafraîchi, nouvelle tentative de connexion...");
-                    await this.connect(channel, true);
-                    return;
-                }
+        this.client.on("disconnected", (reason) => {
+            this.logger.warn(`Déconnecté du chat Twitch : ${reason || "raison inconnue"}. Reconnexion automatique...`);
+        });
+
+        this.client.on("reconnect", () => {
+            this.logger.log("Tentative de reconnexion au chat Twitch...");
+        });
+
+        this.client.on("notice", (_channel, msgid, message) => {
+            this.logger.warn(`Notice Twitch (${msgid ?? "?"}) : ${message}`);
+        });
+    }
+
+    /**
+     * Lance la connexion initiale. tmi.js gère seul les reconnexions
+     * ultérieures (option `connection.reconnect`) ; ici on gère uniquement
+     * l'échec de la toute première tentative, en réessayant indéfiniment.
+     */
+    private async connect(): Promise<void> {
+        if (!this.client) {
+            return;
+        }
+
+        while (true) {
+            try {
+                await this.client.connect();
+                return;
+            } catch (err) {
                 this.logger.error(
-                    `Le token Twitch semble invalide. Ré-authentifiez-vous via GET /auth/twitch/login.`,
+                    `Impossible de se connecter au chat Twitch : ${(err as Error).message}. Nouvelle tentative dans 5s...`,
                 );
+                await new Promise<void>((resolve) => setTimeout(resolve, 5000));
             }
         }
     }
@@ -124,5 +145,6 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
         return this.lastMessageByUser;
     }
 }
+
 
 
