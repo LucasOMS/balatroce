@@ -5,6 +5,7 @@ import {ChatAction} from "src/interfaces/chat-action";
 import {GameCycleService} from "../services/game-cycle.service";
 import {BotMethod} from "../interfaces/bot-request";
 import {OverlaySocketService} from "../services/overlay-socket.service";
+import {TwitchMessageCollectorService} from "../services/twitch-message-collector.service";
 
 @Controller()
 export class TestController {
@@ -12,6 +13,7 @@ export class TestController {
         private readonly botService: BotService,
         private readonly gameCycle: GameCycleService,
         private readonly overlayService: OverlaySocketService,
+        private readonly twitchMessageCollector: TwitchMessageCollectorService,
     ) {
     }
 
@@ -31,6 +33,22 @@ export class TestController {
         } else {
             console.log("No valid action found");
         }
+    }
+
+    /**
+     * Simule la réception d'un message de chat Twitch, comme s'il venait
+     * réellement du chat (utilisé par command-emulation.ts en mode "twitch").
+     * GET /debug/twitch/:user/:message
+     */
+    @Get("debug/twitch/:user/:message")
+    public simulateTwitchMessage(
+        @Param("user") user: string,
+        @Param("message") message: string,
+    ): { ok: boolean } {
+        const m = message.replaceAll("_", " ");
+        console.log(`Twitch message from ${user} : ${m}`);
+        this.twitchMessageCollector.registerMessage(user, m);
+        return {ok: true};
     }
 
     // ── Routes de debug (dev uniquement) ─────────────────────────────────────────

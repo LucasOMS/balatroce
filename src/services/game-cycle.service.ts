@@ -11,6 +11,7 @@ import {UseConsumableAction} from "../interfaces/actions/use-consumable.action";
 import {SellConsumableAction, SellJokerAction} from "../interfaces/actions/sell-consumable.action";
 import {BuyAction} from "../interfaces/actions/shop.action";
 import {OverlaySocketService} from "./overlay-socket.service";
+import {TwitchActionDeciderService} from "./twitch-action-decider.service";
 
 @Injectable()
 export class GameCycleService implements OnModuleInit {
@@ -21,12 +22,18 @@ export class GameCycleService implements OnModuleInit {
         private readonly botService: BotService,
         private readonly logger: Logger,
         private readonly overlaySocketService: OverlaySocketService,
+        private readonly twitchActionDecider: TwitchActionDeciderService,
     ) {
     }
 
     public async onModuleInit(): Promise<void> {
         await this.botService.awaitInit();
         this.currentGameState = await this.botService.getCurrentState();
+
+        this.twitchActionDecider.actionsResult$.subscribe((actions) => {
+            this.registerChatActions(actions);
+        });
+        this.twitchActionDecider.startTimer();
 
         // Start steps without waiting because await would lock the module init
         void this.nextStep();
@@ -217,6 +224,20 @@ export class GameCycleService implements OnModuleInit {
             return;
         }
         this.actionsSubject.next(request);
+    }
+
+    /**
+     * Reçoit la liste des actions décidées par le vote Twitch Plays (ordonnée
+     * de la plus préférée à la moins préférée) et enregistre la première qui
+     * est valide dans l'état de jeu courant.
+     */
+    public registerChatActions(actions: ChatAction[]): void {
+        const validAction = actions.find((action) => this.isActionValid(action));
+        if (!validAction) {
+            this.logger.warn("Aucune action valide parmi les résultats du vote : ", actions);
+            return;
+        }
+        this.actionsSubject.next(validAction);
     }
 
     private async nextStep() {

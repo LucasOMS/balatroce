@@ -14,6 +14,15 @@ import { parsePackAction, parsePackSkipAction } from "./pack.parser";
 
 export { ActionKeyword };
 
+/**
+ * Indique si le message (déjà en lowercase ou non) commence par un ActionKeyword connu.
+ */
+export function isActionMessage(msg: string): boolean {
+  const normalized = msg.toLowerCase().trim();
+  const name = extractName(normalized);
+  return Object.values(ActionKeyword).some((keyword) => (keyword as string) === name);
+}
+
 export function parseAllParser(msg: string): ChatAction | null {
   const normalized = msg.toLowerCase().trim();
 
@@ -63,7 +72,7 @@ export function parseAllParser(msg: string): ChatAction | null {
 /**
  * Extract name of the action (not including !)
  */
-function extractName(input: string): string {
+export function extractName(input: string): string {
   const sanitized = input.startsWith("!") ? input.slice(1) : input;
   const words = sanitized.trim().split(/\s+/);
   return words[0] ?? "";

@@ -173,6 +173,59 @@ curl "http://localhost:3000/simulate/!jouer_1_3"
 Lancer l'utilitaire command-emulation avec `npm run emulate-commands` qui demande une commande à envoyer au serveur. La
 commande est exécutée immédiatement.
 
+L'utilitaire propose deux modes (commande `mode <admin|twitch>`) :
+
+- **`admin`** (par défaut) : les commandes sont directement exécutées par le serveur (comme `!simulate/...`),
+  sans passer par le système de vote. Pratique pour avancer rapidement pendant le développement.
+- **`twitch`** : les commandes sont envoyées comme si elles venaient du chat Twitch (via `TestController`), et
+  entrent donc dans le système de vote (Twitch Plays). Utilisez `user <pseudo>` pour changer l'utilisateur simulé.
+
+---
+
+## Twitch Plays (vote sur les actions du chat)
+
+Le projet permet de piloter Balatro en laissant les viewers Twitch voter pour l'action à effectuer.
+
+### Fonctionnement
+
+1. **`TwitchMessageCollectorService`** se connecte au chat Twitch (via [tmi.js](https://github.com/tmijs/tmi.js)) et
+   enregistre le dernier message (en minuscules) de chaque utilisateur qui commence par un mot-clé d'action valide.
+2. **`TwitchActionDeciderService`** maintient un timer de vote. À la fin de la période de vote, il unifie les messages
+   équivalents (ex: `!jouer 2 1 3` et `!jouer 1 2 3` comptent comme la même action), calcule le nombre de votes par
+   action, puis utilise une stratégie pour décider de l'ordre de préférence des actions :
+   - **`DemocracyStrategy`** : renvoie les actions de la plus votée à la moins votée.
+   - **`AnarchyStrategy`** : tire au sort les actions avec une probabilité pondérée par leur nombre de votes.
+3. **`GameCycleService`** reçoit la liste ordonnée d'actions et exécute la première qui est valide dans l'état de jeu
+   courant.
+4. **`OverlaySocketService`** diffuse, indépendamment du reste de l'overlay, l'état du vote (`état du timer`, `sa fin
+   si en cours`, `le décompte des votes`) via l'événement WebSocket `twitch:vote-update`.
+
+### Variables d'environnement
+
+| Variable                  | Description                                                             | Défaut       |
+|----------------------------|--------------------------------------------------------------------------|--------------|
+| `TWITCH_CHANNEL`           | Nom de la chaîne Twitch à écouter (sans le `#`)                          | _(aucun)_    |
+| `TWITCH_BOT_USERNAME`      | Nom d'utilisateur du bot (optionnel, lecture anonyme possible)           | _(aucun)_    |
+| `TWITCH_OAUTH_TOKEN`       | Token OAuth du bot (optionnel, lecture anonyme possible)                 | _(aucun)_    |
+| `TWITCH_MOCK`              | Si `true`, désactive la connexion Twitch réelle (voir section debug)     | `false`      |
+| `TWITCH_VOTE_DURATION_MS`  | Durée (ms) de la période de vote                                         | `20000`      |
+| `TWITCH_VOTE_DELAY_MS`     | Durée (ms) du délai entre deux votes (messages "en retard")              | `5000`       |
+| `TWITCH_VOTE_STRATEGY`     | Stratégie de décision : `democracy` ou `anarchy`                         | `democracy`  |
+
+Ces variables peuvent être définies dans votre shell, ou via un fichier `.env` chargé au démarrage avec
+`node --env-file=.env` (Node 20+).
+
+### Tester en local sans Twitch (mode mock)
+
+Lancez le serveur avec `npm run start:mock` (équivalent à `TWITCH_MOCK=true npm run start:dev`) : le serveur démarre
+normalement mais ne se connecte pas réellement à Twitch. Vous pouvez alors simuler des messages de chat via :
+
+```bash
+curl "http://localhost:3000/debug/twitch/monpseudo/!jouer_1_2_3"
+```
+
+ou plus simplement avec `npm run emulate-commands` en `mode twitch` (voir ci-dessus).
+
 ---
 
 ## Commandes non encore supportées

@@ -13,6 +13,8 @@ import {ConsumableNumbersComponent} from './consumable-numbers/consumable-number
 import {ShopVoucherNumbersComponent} from './shop-voucher-numbers/shop-voucher-numbers.component';
 import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-descriptions.component';
 import {ConsumableDescriptionsComponent} from './consumable-descriptions/consumable-descriptions.component';
+import {VoteCountComponent} from './vote-count/vote-count.component';
+import {DelayCountComponent} from './delay-count/delay-count.component';
 
 @Component({
   selector: "app-game-overlay",
@@ -29,11 +31,12 @@ import {ConsumableDescriptionsComponent} from './consumable-descriptions/consuma
     ShopVoucherNumbersComponent,
     ShopPackDescriptionsComponent,
     ConsumableDescriptionsComponent,
+    VoteCountComponent,
+    DelayCountComponent,
   ],
   templateUrl: "./game-overlay.component.html",
 })
-export class GameOverlayComponent {
-  private readonly overlaySocket = inject(OverlaySocket);
+export class GameOverlayComponent {  private readonly overlaySocket = inject(OverlaySocket);
 
   protected readonly captureVideoRef = viewChild<ElementRef<HTMLVideoElement>>("captureVideo");
   protected readonly captureStream = signal<MediaStream | null>(null);

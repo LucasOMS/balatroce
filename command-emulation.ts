@@ -2,7 +2,7 @@
  * Script de debug interactif pour balatroce.
  *
  * Prérequis : serveur NestJS démarré (npm run start:dev)
- * Lancement  : npm run debug [-- --port 3000]
+ * Lancement  : npm run emulate-commands [-- --port 3000]
  *
  * Commandes disponibles :
  *   <mot-clé> [args]   → simule un message chat (ex: jouer 1 2 3)
@@ -18,6 +18,13 @@
  * Champs pour "debug set" :
  *   money, chips, ante, round, hands, discards
  *   hand_size, joker_slots, consumable_slots
+ *
+ * Modes (commande "mode <mode>") :
+ *   admin  (défaut) → les commandes sont directement exécutées par le serveur
+ *                      (bypass du vote Twitch Plays, pratique pour développer)
+ *   twitch          → les commandes sont envoyées comme si elles venaient du chat
+ *                      Twitch (elles entrent dans le système de vote). Utilisez
+ *                      "user <pseudo>" pour changer l'utilisateur simulé.
  */
 
 import * as readline from "node:readline";
@@ -26,6 +33,11 @@ import {ActionKeyword} from "./src/enums/action-keywords.enum";
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const BASE_URL = `http://localhost:3000`;
+
+type EmulationMode = "admin" | "twitch";
+
+let mode: EmulationMode = "admin";
+let twitchUser = "twitchuser";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -37,6 +49,11 @@ function printHelp(): void {
     console.log("\n  etat              → affiche l'état du jeu");
     console.log("  aide              → affiche ce message");
     console.log("  exit / Ctrl+C    → quitter");
+
+    console.log("\n── Modes ───────────────────────────────────────────────");
+    console.log("  mode admin        → exécute directement les commandes (défaut)");
+    console.log("  mode twitch       → simule des messages du chat Twitch (entre dans le vote)");
+    console.log("  user <pseudo>     → change l'utilisateur simulé en mode twitch");
 
     console.log("\n── Commandes de debug ─────────────────────────────────");
     console.log("  debug set <champ> <valeur>");
@@ -72,7 +89,7 @@ async function simulate(cmd: string): Promise<void> {
     try {
         const res = await fetch(url);
         if (res.ok) {
-            console.log("✅ Commande envoyée.");
+            console.log("✅ Commande envoyée (admin, exécution directe).");
         } else {
             const text = await res.text();
             console.log(`⚠️  Réponse ${res.status.toString()} : ${text}`);
@@ -82,6 +99,24 @@ async function simulate(cmd: string): Promise<void> {
         console.error(`   URL : ${url}`);
     }
 }
+
+async function simulateTwitchMessage(user: string, cmd: string): Promise<void> {
+    const encoded = cmd.trim().replaceAll(" ", "_");
+    const url = `${BASE_URL}/debug/twitch/${encodeURIComponent(user)}/${encodeURIComponent(encoded)}`;
+    try {
+        const res = await fetch(url);
+        if (res.ok) {
+            console.log(`✅ Message envoyé comme si "${user}" l'avait tapé dans le chat Twitch.`);
+        } else {
+            const text = await res.text();
+            console.log(`⚠️  Réponse ${res.status.toString()} : ${text}`);
+        }
+    } catch (e: unknown) {
+        console.error(`❌ Erreur réseau : ${(e as Error).message}`);
+        console.error(`   URL : ${url}`);
+    }
+}
+
 
 async function handleDebug(parts: string[]): Promise<void> {
     if (parts.length < 2) {
@@ -170,7 +205,7 @@ function startRepl(): void {
     });
 
     const loop = (): void => {
-        rl.question("› ", (input: string) => {
+        rl.question(`[${mode}${mode === "twitch" ? `:${twitchUser}` : ""}] › `, (input: string) => {
             const trimmed = input.trim();
 
             if (!trimmed) {
@@ -189,14 +224,35 @@ function startRepl(): void {
                     printHelp();
                 } else if (trimmed === "etat" || trimmed === "state") {
                     await getState();
+                } else if (trimmed.toLowerCase().startsWith("mode")) {
+                    const parts = trimmed.split(/\s+/);
+                    const newMode = parts[1]?.toLowerCase();
+                    if (newMode === "admin" || newMode === "twitch") {
+                        mode = newMode;
+                        console.log(`✅ Mode changé : ${mode}`);
+                    } else {
+                        console.log('⚠️  Usage : mode <admin|twitch>');
+                    }
+                } else if (trimmed.toLowerCase().startsWith("user")) {
+                    const parts = trimmed.split(/\s+/);
+                    if (parts.length !== 2) {
+                        console.log("⚠️  Usage : user <pseudo>");
+                    } else {
+                        twitchUser = parts[1];
+                        console.log(`✅ Utilisateur Twitch simulé : ${twitchUser}`);
+                    }
                 } else if (trimmed.toLowerCase().startsWith("debug")) {
-                    // Commande de debug directe (bypass parser + game cycle)
+                    // Commande de debug directe (bypass parser + game cycle + vote)
                     const parts = trimmed.split(/\s+/);
                     await handleDebug(parts);
                 } else {
                     // Accepte avec ou sans "!"
                     const cmd = trimmed.startsWith("!") ? trimmed.slice(1) : trimmed;
-                    await simulate(cmd);
+                    if (mode === "twitch") {
+                        await simulateTwitchMessage(twitchUser, cmd);
+                    } else {
+                        await simulate(cmd);
+                    }
                 }
 
                 loop();
