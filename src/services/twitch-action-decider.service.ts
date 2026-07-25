@@ -9,29 +9,28 @@ import { DemocracyStrategy } from "./twitch/democracy-strategy";
 import { AnarchyStrategy } from "./twitch/anarchy-strategy";
 import { VoteTimerState } from "../../shared/timer-state";
 import { TwitchVoteInfo } from "../../shared/twitch-vote-info";
+import { BidWarKeyword } from "../../shared/bid-war-keyword";
+import { StreamlabsDonationCollecterService } from "./streamlabs-donation-collecter.service";
 
 /**
  * Décide quelle(s) action(s) effectuer à partir des messages du chat collectés
  * par TwitchMessageCollectorService, et maintient le timer de vote.
  *
+ * La stratégie de vote (démocratie ou anarchie) est déterminée à chaque fin de
+ * vote par la bid war (StreamlabsDonationCollecterService), en fonction de la
+ * stratégie qui a reçu le plus de dons.
+ *
  * Variables d'environnement :
  * - TWITCH_VOTE_DURATION_MS : durée (ms) de la phase de vote (défaut 20000)
  * - TWITCH_VOTE_DELAY_MS : durée (ms) de la phase de délai entre deux votes,
  *   pour laisser passer les messages "en retard" (défaut 5000)
- * - TWITCH_VOTE_STRATEGY : "democracy" (défaut) ou "anarchy"
  */
 @Injectable()
 export class TwitchActionDeciderService implements OnModuleDestroy {
   static readonly VOTE_DURATION_MS = parseInt(process.env.TWITCH_VOTE_DURATION_MS ?? "20000", 10);
   static readonly DELAY_DURATION_MS = parseInt(process.env.TWITCH_VOTE_DELAY_MS ?? "5000", 10);
-  static readonly STRATEGY_NAME = (process.env.TWITCH_VOTE_STRATEGY ?? "democracy").toLowerCase();
 
   private readonly logger = new Logger(TwitchActionDeciderService.name);
-
-  private readonly strategy: VoteStrategy =
-    TwitchActionDeciderService.STRATEGY_NAME === "anarchy"
-      ? new AnarchyStrategy()
-      : new DemocracyStrategy();
 
   private state: VoteTimerState = VoteTimerState.STOPPED;
   private endTimestamp: number | null = null;
@@ -46,8 +45,18 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
   /** Émet à chaque fois que l'état du timer ou le décompte des votes change */
   public readonly voteInfoChanged$: Observable<unknown>;
 
-  constructor(private readonly collector: TwitchMessageCollectorService) {
+  constructor(
+    private readonly collector: TwitchMessageCollectorService,
+    private readonly bidWarService: StreamlabsDonationCollecterService,
+  ) {
     this.voteInfoChanged$ = merge(this.stateChangeSubject.asObservable(), this.collector.newMessages$);
+  }
+
+  /** Stratégie à utiliser pour le prochain vote, décidée par la bid war en cours */
+  private getStrategy(): VoteStrategy {
+    return this.bidWarService.getLeadingKeyword() === BidWarKeyword.Anarchy
+      ? new AnarchyStrategy()
+      : new DemocracyStrategy();
   }
 
   public onModuleDestroy(): void {
@@ -104,7 +113,7 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
 
   private onVoteEnd(): void {
     const entries = this.computeVoteEntries();
-    const orderedActions = this.strategy.decide(entries);
+    const orderedActions = this.getStrategy().decide(entries);
     this.logger.log(`Fin du vote : ${orderedActions.length.toString()} action(s) ordonnée(s)`);
     this.actionsResultSubject.next(orderedActions);
     this.collector.clear();
@@ -147,4 +156,7 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     return [...grouped.values()];
   }
 }
+
+
+
 

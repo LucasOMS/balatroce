@@ -10,7 +10,7 @@
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start",
         "start:overlay": "cd overlay && npm run start:dev",
-        "start:mock": "cross-env TWITCH_MOCK=true nest start --watch",
+        "start:mock": "cross-env TWITCH_MOCK=true STREAMLABS_MOCK=true nest start --watch",
         "start:dev": "cross-env TWITCH_CHANNEL=angledroit nest start --watch",
         "start:debug": "cross-env TWITCH_CHANNEL=angledroit nest start --debug --watch",
         "start:prod": "cross-env TWITCH_CHANNEL=angledroit node dist/main",
@@ -32,6 +32,7 @@
         "reflect-metadata": "^0.2.2",
         "rxjs": "^7.8.1",
         "socket.io": "^4.8.3",
+        "socket.io-client": "^4.8.3",
         "tmi.js": "^1.8.5"
     },
     "devDependencies": {

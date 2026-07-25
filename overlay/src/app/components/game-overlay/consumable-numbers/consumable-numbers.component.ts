@@ -13,10 +13,6 @@ import {Area} from "@shared/game-state";
           </div>
         }
       </div>
-    } @else {
-      <div class="error-message text-outline-2">
-        Vous avez cassé le jeu au delà de nos attentes.<br>Vous allez devoir compter les cartes
-      </div>
     }
   `,
 
@@ -28,17 +24,6 @@ import {Area} from "@shared/game-state";
       height: 70px;
       display: grid;
       place-content: center;
-    }
-
-    .error-message {
-      position: absolute;
-      top: 280px;
-      left: 598px;
-      color: white;
-      font-size: 26px;
-      text-align: center;
-      line-height: 28px;
-      width: 672px;
     }
 
     :host > * {

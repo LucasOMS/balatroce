@@ -15,6 +15,8 @@ import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-
 import {ConsumableDescriptionsComponent} from './consumable-descriptions/consumable-descriptions.component';
 import {VoteCountComponent} from './vote-count/vote-count.component';
 import {DelayCountComponent} from './delay-count/delay-count.component';
+import {BidWarComponent} from './bid-war/bid-war.component';
+import {JokerDescriptionsComponent} from './joker-descriptions/joker-descriptions.component';
 
 @Component({
   selector: "app-game-overlay",
@@ -33,6 +35,8 @@ import {DelayCountComponent} from './delay-count/delay-count.component';
     ConsumableDescriptionsComponent,
     VoteCountComponent,
     DelayCountComponent,
+    BidWarComponent,
+    JokerDescriptionsComponent,
   ],
   templateUrl: "./game-overlay.component.html",
 })

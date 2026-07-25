@@ -1,5 +1,5 @@
 <!-- Conteneur fixe 1920×1080 — overlay Balatro -->
-<div class="relative overflow-hidden bg-black w-[1920px] h-[1080px]">
+<div class="relative overflow-hidden bg-black w-[1920px] h-[1080px]" style="anchor-name: --game">
 
   <!-- Fond : fenêtre capturée -->
   <video
@@ -90,13 +90,18 @@
       [actions]="availableActions()"
     />
 
+    <app-joker-descriptions
+      class="absolute z-10 top-0 left-0 w-full h-full"
+      [jokers]="state.jokers"
+    />
+
     <app-joker-numbers
       class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
       [jokers]="state.jokers"
     />
 
     <app-consumable-descriptions
-      class="absolute z-10 top-0 left-0 w-full h-full"
+      class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
       [consumables]="state.consumables"
     />
 
@@ -113,6 +118,10 @@
   />
 
   <app-delay-count
+    class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
+  />
+
+  <app-bid-war
     class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
   />
 

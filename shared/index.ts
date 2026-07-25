@@ -23,5 +23,9 @@ export type { OverlayInfo } from "./overlay-info";
 export { VoteTimerState } from "./timer-state";
 export { TWITCH_VOTE_UPDATE_EVENT } from "./twitch-vote-info";
 export type { TwitchVoteInfo, VoteCountEntry } from "./twitch-vote-info";
+export { BidWarKeyword } from "./bid-war-keyword";
+export { BID_WAR_UPDATE_EVENT } from "./bid-war-info";
+export type { BidWarInfo } from "./bid-war-info";
+
 
 

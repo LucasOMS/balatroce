@@ -6,6 +6,8 @@ import {GameCycleService} from "../services/game-cycle.service";
 import {BotMethod} from "../interfaces/bot-request";
 import {OverlaySocketService} from "../services/overlay-socket.service";
 import {TwitchMessageCollectorService} from "../services/twitch-message-collector.service";
+import {StreamlabsDonationCollecterService} from "../services/streamlabs-donation-collecter.service";
+import {BidWarKeyword} from "../../shared/bid-war-keyword";
 
 @Controller()
 export class TestController {
@@ -14,6 +16,7 @@ export class TestController {
         private readonly gameCycle: GameCycleService,
         private readonly overlayService: OverlaySocketService,
         private readonly twitchMessageCollector: TwitchMessageCollectorService,
+        private readonly bidWarService: StreamlabsDonationCollecterService,
     ) {
     }
 
@@ -48,6 +51,30 @@ export class TestController {
         const m = message.replaceAll("_", " ");
         console.log(`Twitch message from ${user} : ${m}`);
         this.twitchMessageCollector.registerMessage(user, m);
+        return {ok: true};
+    }
+
+    /**
+     * Simule un don Streamlabs pour la bid war, comme si un spectateur avait
+     * réellement fait un don avec ce mot-clé dans son message (utilisé par
+     * command-emulation.ts, commande "don").
+     * GET /debug/donation/:keyword/:amount
+     */
+    @Get("debug/donation/:keyword/:amount")
+    public simulateDonation(
+        @Param("keyword") keyword: string,
+        @Param("amount") amount: string,
+    ): { ok: boolean } | { error: string } {
+        const num = parseFloat(amount);
+        if (isNaN(num) || num < 0) {
+            return {error: `Montant invalide : "${amount}"`};
+        }
+        const kw = Object.values(BidWarKeyword).find((k) => k === keyword.toLowerCase());
+        if (!kw) {
+            return {error: `Mot-clé inconnu : "${keyword}". Valeurs possibles : ${Object.values(BidWarKeyword).join(", ")}`};
+        }
+        console.log(`Don simulé : ${kw} ${num}`);
+        this.bidWarService.simulateDonation(kw, num);
         return {ok: true};
     }
 

@@ -60,6 +60,7 @@ export class AutoFitTextComponent {
     viewChild.required<ElementRef<HTMLDivElement>>('content');
 
   private resizeObserver?: ResizeObserver;
+  private mutationObserver?: MutationObserver;
 
   constructor(
     private readonly host: ElementRef<HTMLElement>,
@@ -67,10 +68,17 @@ export class AutoFitTextComponent {
   ) {
     effect(() => {
       this.baseFontSize();
+      this.minFontSize();
 
       this.scheduleFit();
     });
 
+    // Note: afterRenderEffect() only re-runs when a tracked signal changes.
+    // Since this callback reads no signal, it would only ever fire once and
+    // would never catch layout changes caused by siblings being added or
+    // removed (e.g. a new joker being added to the list). The actual
+    // re-fitting on such changes is handled by the ResizeObserver/
+    // MutationObserver below instead.
     afterRenderEffect(() => {
       this.scheduleFit();
     });
@@ -78,16 +86,43 @@ export class AutoFitTextComponent {
 
   ngAfterViewInit(): void {
     this.zone.runOutsideAngular(() => {
+      const host = this.host.nativeElement;
+      const parent = host.parentElement;
+      const content = this.content().nativeElement;
+
       this.resizeObserver = new ResizeObserver(() => {
         this.scheduleFit();
       });
 
-      this.resizeObserver.observe(this.host.nativeElement);
+      // Observe both the host (in case it is resized directly) and its
+      // parent (the actual box whose available space we measure), since
+      // the host's own size doesn't always update synchronously with its
+      // parent's size when siblings are added/removed from a flex/grid
+      // layout.
+      this.resizeObserver.observe(host);
+
+      if (parent) {
+        this.resizeObserver.observe(parent);
+      }
+
+      // Catch content changes (e.g. the projected text itself changing)
+      // that don't necessarily trigger a size change detectable by the
+      // ResizeObserver above.
+      this.mutationObserver = new MutationObserver(() => {
+        this.scheduleFit();
+      });
+
+      this.mutationObserver.observe(content, {
+        characterData: true,
+        childList: true,
+        subtree: true,
+      });
     });
   }
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
+    this.mutationObserver?.disconnect();
   }
 
   private scheduleFit(): void {

@@ -16,7 +16,7 @@ import {Area} from "@shared/game-state";
       </div>
     } @else {
       <div class="error-message text-outline-2">
-        Vous avez cassé le jeu au delà de nos attentes.<br>Vous allez devoir compter les cartes
+        Vous avez cassé le jeu au delà de nos attentes.<br>Vous allez devoir compter les jokers
       </div>
     }
   `,
@@ -62,13 +62,14 @@ import {Area} from "@shared/game-state";
     .joker-count-2 {
       > :nth-child(1) {
         top: 275px;
-        left: 861px;
+        left: 695px;
+        rotate: -2deg;
       }
 
       > :nth-child(2) {
         top: 275px;
-        left: 695px;
-        rotate: -2deg;
+        left: 1024px;
+        rotate: 2deg;
       }
     }
 

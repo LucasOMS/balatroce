@@ -29,6 +29,7 @@
 
 import * as readline from "node:readline";
 import {ActionKeyword} from "./src/enums/action-keywords.enum";
+import {BidWarKeyword} from "./shared/bid-war-keyword";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -54,6 +55,12 @@ function printHelp(): void {
     console.log("  mode admin        → exécute directement les commandes (défaut)");
     console.log("  mode twitch       → simule des messages du chat Twitch (entre dans le vote)");
     console.log("  user <pseudo>     → change l'utilisateur simulé en mode twitch");
+
+    console.log("\n── Bid war (dons Streamlabs, mode STREAMLABS_MOCK) ─────");
+    console.log("  don <mot-clé> <montant>");
+    console.log(`    Mots-clés : ${Object.values(BidWarKeyword).join(", ")}`);
+    console.log("    Ex: don democratie 5");
+    console.log("    Ex: don anarchie 10");
 
     console.log("\n── Commandes de debug ─────────────────────────────────");
     console.log("  debug set <champ> <valeur>");
@@ -110,6 +117,22 @@ async function simulateTwitchMessage(user: string, cmd: string): Promise<void> {
         } else {
             const text = await res.text();
             console.log(`⚠️  Réponse ${res.status.toString()} : ${text}`);
+        }
+    } catch (e: unknown) {
+        console.error(`❌ Erreur réseau : ${(e as Error).message}`);
+        console.error(`   URL : ${url}`);
+    }
+}
+
+async function simulateDonation(keyword: string, amount: string): Promise<void> {
+    const url = `${BASE_URL}/debug/donation/${encodeURIComponent(keyword)}/${encodeURIComponent(amount)}`;
+    try {
+        const res = await fetch(url);
+        const data: unknown = await res.json();
+        if (res.ok && !(data && typeof data === "object" && "error" in data)) {
+            console.log(`✅ Don simulé : ${keyword} → ${amount}`);
+        } else {
+            console.log(`⚠️  Réponse ${res.status.toString()} : ${JSON.stringify(data)}`);
         }
     } catch (e: unknown) {
         console.error(`❌ Erreur réseau : ${(e as Error).message}`);
@@ -245,6 +268,15 @@ function startRepl(): void {
                     // Commande de debug directe (bypass parser + game cycle + vote)
                     const parts = trimmed.split(/\s+/);
                     await handleDebug(parts);
+                } else if (trimmed.toLowerCase().startsWith("don ")) {
+                    // don <mot-clé> <montant> → simule un don Streamlabs pour la bid war
+                    const parts = trimmed.split(/\s+/);
+                    if (parts.length !== 3) {
+                        console.log("⚠️  Usage : don <mot-clé> <montant>");
+                        console.log(`   Mots-clés : ${Object.values(BidWarKeyword).join(", ")}`);
+                    } else {
+                        await simulateDonation(parts[1], parts[2]);
+                    }
                 } else {
                     // Accepte avec ou sans "!"
                     const cmd = trimmed.startsWith("!") ? trimmed.slice(1) : trimmed;

@@ -3,17 +3,17 @@ import {Area} from "@shared/game-state";
 import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component';
 
 @Component({
-  selector: "app-consumable-descriptions",
+  selector: "app-joker-descriptions",
   host: {class: "block"},
   imports: [
     AutoFitTextComponent
   ],
   template: `
     @if (count() > 0) {
-      <div class="consumable-descriptions">
+      <div class="joker-descriptions">
         @for (desc of descriptions(); track desc) {
           @if (desc.length > 0) {
-            <div class="consumable-description text-white p-1 bg-black/80 flex items-center justify-center rounded-[16px] border-4 border-white text-center">
+            <div class="joker-description text-white p-1 bg-black/80 flex items-center justify-center rounded-[16px] border-4 border-white text-center">
               <app-auto-fit-text baseFontSize="24" class="**:items-center">
                 {{ desc }}
               </app-auto-fit-text>
@@ -24,7 +24,7 @@ import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component'
     }
   `,
   styles: `
-    .consumable-descriptions {
+    .joker-descriptions {
       position: fixed;
       position-anchor: --game;
       top: calc(anchor(top) - 110px);
@@ -45,29 +45,29 @@ import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component'
     }
 
 
-    .consumable-description {
-      --consumable-width: 161px;
-      width: var(--consumable-width);
-      max-width: var(--consumable-width);
+    .joker-description {
+      --joker-width: 161px;
+      width: var(--joker-width);
+      max-width: var(--joker-width);
       /* Allow the flex item to actually shrink below its content's
          min-content size instead of overflowing the row when more
-         consumables are added. */
+         jokers are added. */
       min-width: 0;
       overflow: hidden;
 
       &:last-child {
-        min-width: var(--consumable-width) !important;
+        min-width: var(--joker-width) !important;
       }
     }
   `
 })
-export class ConsumableDescriptionsComponent {
-  readonly consumables = input.required<Area>();
+export class JokerDescriptionsComponent {
+  readonly jokers = input.required<Area>();
 
-  protected readonly count = computed(() => this.consumables().count ?? 0);
+  protected readonly count = computed(() => this.jokers().cards.length ?? 0);
 
   protected readonly descriptions = computed<string[]>(() =>
-    this.consumables().cards.map(card => card.value.effect ?? '')
+    this.jokers().cards.map(joker => joker.value.effect ?? '')
   );
 }
 

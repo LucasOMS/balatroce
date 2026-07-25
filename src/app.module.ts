@@ -9,6 +9,7 @@ import { OverlayService } from "./services/overlay.service";
 import { OverlaySocketService } from "./services/overlay-socket.service";
 import { TwitchMessageCollectorService } from "./services/twitch-message-collector.service";
 import { TwitchActionDeciderService } from "./services/twitch-action-decider.service";
+import { StreamlabsDonationCollecterService } from "./services/streamlabs-donation-collecter.service";
 
 @Module({
   imports: [],
@@ -23,6 +24,7 @@ import { TwitchActionDeciderService } from "./services/twitch-action-decider.ser
     OverlaySocketService,
     TwitchMessageCollectorService,
     TwitchActionDeciderService,
+    StreamlabsDonationCollecterService,
   ],
   exports: [OverlaySocketService],
 })
