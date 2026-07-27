@@ -1,1 +1,21 @@
-<app-game-overlay />
+<div class="relative w-[1920px] h-[1080px] bg-zevent">
+
+
+  <div class="absolute z-20 scale-75 -left-27 -top-4 [--square-progress-thickness:8px]">
+    <app-delay-count
+      class="absolute -inset-(--square-progress-thickness) z-10 pointer-events-none"
+    />
+
+    <app-game-overlay [overlayInfo]="overlayInfo()" class="" />
+  </div>
+
+
+  <!-- Toujours visible, même hors partie (menu, chargement, etc.) -->
+  <app-vote-count
+    class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
+  />
+
+  <app-bid-war
+    class="absolute z-20 bottom-2 left-22 w-[400px] pointer-events-none"
+  />
+</div>

@@ -1,12 +1,12 @@
 import {Component, computed, inject} from "@angular/core";
 import {TwitchVoteSocket} from "../../../services/twitch-vote-socket";
+import {CardComponent} from '../../card.component';
 
 @Component({
   selector: "app-vote-count",
   host: {class: "block"},
   template: `
-    <div class="absolute top-10 right-1.5 bg-black/80 text-white p-2 rounded-[16px] border-4 border-white flex flex-col gap-1 min-w-[260px]">
-      <div class="text-[22px] font-bold border-b border-white/30 pb-1 mb-1">Votes</div>
+    <app-card title="Votes" class="absolute top-10 right-1.5 min-w-[260px]">
       @for (entry of voteCounts(); track entry.label) {
         <div class="flex gap-2 justify-between items-baseline">
           <div class="text-[24px]">{{ entry.label }}</div>
@@ -15,8 +15,11 @@ import {TwitchVoteSocket} from "../../../services/twitch-vote-socket";
       } @empty {
         <div class="text-[20px] italic opacity-70">Aucun vote pour l'instant</div>
       }
-    </div>
+    </app-card>
   `,
+  imports: [
+    CardComponent
+  ]
 })
 export class VoteCountComponent {
   private readonly twitchVoteSocket = inject(TwitchVoteSocket);

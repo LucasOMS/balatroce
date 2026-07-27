@@ -2,9 +2,31 @@
 
 @source "./**/*.{ts,html}";
 
+@theme static {
+  --joker-consumable-height: 150px;
+}
+
 @theme {
   /* Espacement de base à 8px (0.5rem) au lieu du défaut 4px (0.25rem) */
   --spacing: 0.5rem;
+
+  --color-chips: #0093ff;
+  --color-mult: #ff4c40;
+  --color-probability: #35bd86;
+  --color-money: #f5b244;
+
+  --color-zevent-50: #E7F8E6;
+  --color-zevent-100: #CFEFCB;
+  --color-zevent-200: #A7DE9C;
+  --color-zevent-300: #7DCC6D;
+  --color-zevent-400: #58B646;
+  --color-zevent-500: #38932C;
+  --color-zevent-600: #28731D;
+  --color-zevent-700: #1C5615;
+  --color-zevent-800: #123A0E;
+  --color-zevent-900: #092307;
+  --color-zevent-950: #041403;
+  --color-zevent-975: #020A02;
 }
 
 
@@ -24,6 +46,21 @@ body {
   syntax: '<color>';
   inherits: true;
   initial-value: black;
+}
+
+@utility mult-mult {
+  display: inline-block;
+  background-color: var(--color-mult);
+  color: white;
+  padding: 0 0.4ch;
+  border-radius: 0.4em;
+}
+
+@utility bg-zevent {
+  background-image: url("/bg-zevent.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
 }
 
 @utility text-outline-* {
@@ -55,3 +92,4 @@ body {
   2px -1px var(--text-outline-color, black),
   -1px 2px var(--text-outline-color, black);
 }
+

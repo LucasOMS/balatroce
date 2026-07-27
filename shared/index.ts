@@ -26,6 +26,9 @@ export type { TwitchVoteInfo, VoteCountEntry } from "./twitch-vote-info";
 export { BidWarKeyword } from "./bid-war-keyword";
 export { BID_WAR_UPDATE_EVENT } from "./bid-war-info";
 export type { BidWarInfo } from "./bid-war-info";
+export { CLOCK_SYNC_EVENT } from "./clock-sync";
+export type { ClockSyncRequest, ClockSyncResponse } from "./clock-sync";
+
 
 
 

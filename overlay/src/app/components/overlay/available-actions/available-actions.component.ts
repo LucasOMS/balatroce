@@ -1,5 +1,6 @@
 import {Component, computed, input} from "@angular/core";
 import {ActionKeyword} from "@shared/action-keyword";
+import {CardComponent} from '../../card.component';
 
 interface Action {
   description: string,
@@ -40,17 +41,18 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
   selector: "app-available-actions",
   host: {class: "block"},
   template: `
-
-    <div class="absolute bottom-10 right-1.5 bg-black/80 text-white p-2 rounded-lg flex flex-col rounded-[16px] border-4 border-white">
+    <app-card title="Actions disponibles" class="absolute bottom-10 right-1.5 ">
       @for (action of displayedActions(); track action) {
         <div class="flex gap-2 justify-between items-baseline">
           <div class="text-[26px]">{{ action.description }}</div>
           <div class="text-[22px]">{{ action.example }}</div>
         </div>
       }
-    </div>
-
+    </app-card>
   `,
+  imports: [
+    CardComponent
+  ]
 })
 export class AvailableActionsComponent {
   readonly actions = input<ActionKeyword[]>([]);

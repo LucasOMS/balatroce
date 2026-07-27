@@ -1,9 +1,9 @@
-import { Component, input, computed } from "@angular/core";
-import { Area } from "@shared/game-state";
+import {Component, computed, input} from "@angular/core";
+import {Area} from "@shared/game-state";
 
 @Component({
   selector: "app-shop-card-numbers",
-  host: { class: "block" },
+  host: {class: "block"},
   template: `
     @if (count() <= 2) {
       <div class="card-count-{{ count() }}">

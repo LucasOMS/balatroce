@@ -1,6 +1,4 @@
-import {Component, computed, ElementRef, inject, signal, viewChild} from "@angular/core";
-import {OverlaySocket} from "../../services/overlay-socket";
-import {AvailableActionsComponent} from "../available-actions/available-actions.component";
+import {Component, computed, ElementRef, input, signal, viewChild} from "@angular/core";
 import {JokerNumbersComponent} from "./joker-numbers/joker-numbers.component";
 import {CardNumbersComponent} from "./card-numbers/card-numbers.component";
 import {ShopCardDescriptionsComponent} from "./shop-card-descriptions/shop-card-descriptions.component";
@@ -13,10 +11,10 @@ import {ConsumableNumbersComponent} from './consumable-numbers/consumable-number
 import {ShopVoucherNumbersComponent} from './shop-voucher-numbers/shop-voucher-numbers.component';
 import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-descriptions.component';
 import {ConsumableDescriptionsComponent} from './consumable-descriptions/consumable-descriptions.component';
-import {VoteCountComponent} from './vote-count/vote-count.component';
-import {DelayCountComponent} from './delay-count/delay-count.component';
-import {BidWarComponent} from './bid-war/bid-war.component';
 import {JokerDescriptionsComponent} from './joker-descriptions/joker-descriptions.component';
+import {OverlayInfo} from '@shared/overlay-info';
+import {AvailableActionsComponent} from '../overlay/available-actions/available-actions.component';
+import {SealDescriptionsComponent} from './seal-descriptions/seal-descriptions.component';
 
 @Component({
   selector: "app-game-overlay",
@@ -33,20 +31,18 @@ import {JokerDescriptionsComponent} from './joker-descriptions/joker-description
     ShopVoucherNumbersComponent,
     ShopPackDescriptionsComponent,
     ConsumableDescriptionsComponent,
-    VoteCountComponent,
-    DelayCountComponent,
-    BidWarComponent,
     JokerDescriptionsComponent,
+    SealDescriptionsComponent,
   ],
+  host: {class: 'block'},
   templateUrl: "./game-overlay.component.html",
 })
-export class GameOverlayComponent {  private readonly overlaySocket = inject(OverlaySocket);
-
+export class GameOverlayComponent {
   protected readonly captureVideoRef = viewChild<ElementRef<HTMLVideoElement>>("captureVideo");
   protected readonly captureStream = signal<MediaStream | null>(null);
 
   /** Relit directement le signal du service */
-  protected readonly overlayInfo = this.overlaySocket.overlayInfo;
+  public readonly overlayInfo = input.required<OverlayInfo | null>()
 
   protected readonly gameState = computed(() => this.overlayInfo()?.gameState ?? null);
   protected readonly availableActions = computed(() => this.overlayInfo()?.availableActions ?? []);

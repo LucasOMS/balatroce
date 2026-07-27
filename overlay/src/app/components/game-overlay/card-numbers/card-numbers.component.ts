@@ -1,5 +1,6 @@
 import {Component, computed, input} from "@angular/core";
 import {Area} from "@shared/game-state";
+import {CardModifierDescriptions} from './card-modifier-descriptions';
 
 @Component({
   selector: "app-card-numbers",
@@ -7,10 +8,18 @@ import {Area} from "@shared/game-state";
   template: `
 
     @if (count() <= 12) {
+      @let cards = hand()?.cards ?? [];
+
       <div class="card-count-{{ count() }}">
         @for (num of numbers(); track num) {
-          <div class="card-number text-outline-2">
-            <span>{{ num }}</span>
+          @let card = cards[num - 1];
+
+          <div class="card-info">
+            <app-card-modifier-descriptions [card]="card" />
+
+            <div class="card-number text-outline-2">
+              <span>{{ num }}</span>
+            </div>
           </div>
         }
       </div>
@@ -19,25 +28,30 @@ import {Area} from "@shared/game-state";
         Vous avez cassé le jeu au delà de nos attente.<br>Vous allez devoir compter les cartes
       </div>
     }
-
   `,
+  imports: [
+    CardModifierDescriptions
+  ],
 
   styles: `
     .card-number {
       font-size: 60px;
       color: white;
-      position: absolute;
       height: 70px;
       display: grid;
       place-content: center;
     }
 
-    :host > * {
-      & > * {
-        width: 161px;
-      }
+    .card-info {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
 
-      & > :last-child {
+      width: 161px;
+
+      &:last-child {
         width: 161px !important;
       }
     }

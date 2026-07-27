@@ -1,5 +1,7 @@
 import {Component, computed, input} from "@angular/core";
 import {Card} from "@shared/game-state";
+import {CardComponent} from '../../card.component';
+import {getCardDescription} from '../../../const/card-descriptions';
 
 @Component({
   selector: "app-shop-card-descriptions",
@@ -9,14 +11,17 @@ import {Card} from "@shared/game-state";
       <div class="card-count-{{ count() }}">
         @for (desc of descriptions(); track desc) {
           @if (desc.length > 0) {
-            <div class="absolute w-21 h-35 text-white p-1 bg-black/80 flex items-center justify-center rounded-[16px] border-4 border-white text-center text-[24px]">
-              <span>{{ desc }}</span>
-            </div>
+            <app-card class="absolute w-21 h-35 flex items-center justify-center text-center text-[24px]">
+              <span [innerHTML]="desc"></span>
+            </app-card>
           }
         }
       </div>
     }
   `,
+  imports: [
+    CardComponent
+  ],
 
   styles: `
     .error-message {
@@ -64,7 +69,7 @@ export class ShopCardDescriptionsComponent {
     if (!cards) {
       return [];
     }
-    return cards.map(card => card.value.effect ?? '');
+    return cards.map(card => getCardDescription(card));
   });
 }
 

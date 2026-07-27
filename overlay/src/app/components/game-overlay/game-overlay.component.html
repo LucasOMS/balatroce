@@ -1,5 +1,7 @@
 <!-- Conteneur fixe 1920×1080 — overlay Balatro -->
-<div class="relative overflow-hidden bg-black w-[1920px] h-[1080px]" style="anchor-name: --game">
+<div
+  class="relative overflow-hidden bg-black w-[1920px] h-[1080px] rounded-[8px]"
+  style="anchor-name: --game">
 
   <!-- Fond : fenêtre capturée -->
   <video
@@ -44,6 +46,10 @@
         class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
         [hand]="state.hand"
       />
+
+      <app-seal-descriptions
+        class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
+        [hand]="state.hand" />
     }
 
     <!-- Boutique -->
@@ -91,7 +97,7 @@
     />
 
     <app-joker-descriptions
-      class="absolute z-10 top-0 left-0 w-full h-full"
+      class="absolute z-30 top-0 left-0 w-full h-full"
       [jokers]="state.jokers"
     />
 
@@ -101,7 +107,7 @@
     />
 
     <app-consumable-descriptions
-      class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
+      class="absolute z-30 top-0 left-0 w-full h-full pointer-events-none"
       [consumables]="state.consumables"
     />
 
@@ -109,22 +115,5 @@
       class="absolute z-10 top-0 left-0 w-full h-full pointer-events-none"
       [consumables]="state.consumables"
     />
-
   }
-
-  <!-- Toujours visible, même hors partie (menu, chargement, etc.) -->
-  <app-vote-count
-    class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
-  />
-
-  <app-delay-count
-    class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
-  />
-
-  <app-bid-war
-    class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
-  />
-
 </div>
-
-<!--{{ overlayInfo() | json }}-->

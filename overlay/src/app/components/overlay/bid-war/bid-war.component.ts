@@ -14,7 +14,7 @@ import {BidWarKeyword} from "@shared/bid-war-keyword";
   host: {class: "block"},
   imports: [DecimalPipe],
   template: `
-    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[900px] flex flex-col items-center gap-1">
+    <div class="flex flex-col items-center gap-1">
       <div class="flex justify-between w-full px-2 text-[22px] font-bold text-white uppercase tracking-wide">
         <span>{{ democracyKeyword }}</span>
         <span>{{ anarchyKeyword }}</span>
@@ -22,24 +22,24 @@ import {BidWarKeyword} from "@shared/bid-war-keyword";
 
       <div class="relative w-full h-[48px] bg-black/80 border-4 border-white rounded-[16px] overflow-hidden flex">
         <div
-          class="h-full bg-blue-600 flex items-center justify-start pl-3 transition-[width] duration-500 ease-out"
+          class="h-full bg-zevent-900 flex items-center justify-start pl-2 transition-[width] duration-500 ease-out"
           [style.width.%]="democracyPercent()"
         >
           @if (democracyPercent() > 10) {
-            <span class="text-[20px] font-bold text-white whitespace-nowrap">{{ democracyAmount() | number: "1.0-2" }} €</span>
+            <span class="text-[28px] text-white whitespace-nowrap">{{ democracyAmount() | number: "1.0-2" }} €</span>
           }
         </div>
         <div
-          class="h-full bg-red-600 flex items-center justify-end pr-3 transition-[width] duration-500 ease-out"
+          class="h-full bg-zevent-300 flex items-center justify-end pr-2 transition-[width] duration-500 ease-out"
           [style.width.%]="anarchyPercent()"
         >
           @if (anarchyPercent() > 10) {
-            <span class="text-[20px] font-bold text-white whitespace-nowrap">{{ anarchyAmount() | number: "1.0-2" }} €</span>
+            <span class="text-[28px] text-white whitespace-nowrap">{{ anarchyAmount() | number: "1.0-2" }} €</span>
           }
         </div>
       </div>
 
-      <div class="text-[16px] text-white/70">
+      <div class="text-[16px] text-white">
         {{ donationCount() }} don(s) · {{ totalAmount() | number: "1.0-2" }} € au total
       </div>
     </div>
