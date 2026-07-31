@@ -124,8 +124,9 @@ export class PackOpeningComponent {
 
   public readonly shouldSelectExtraCards = computed<boolean>(() => this.pack().cards.map(c => c.set).some(
     s => [
-      // Card that would require selecting extra card
-      CardSet.TAROT
+      // Card that could require selecting extra card
+      CardSet.TAROT,
+      CardSet.SPECTRAL,
     ].includes(s)
   ));
 
