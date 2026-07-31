@@ -49,6 +49,7 @@ function printHelp(): void {
     }
     console.log("\n  etat              → affiche l'état du jeu");
     console.log("  aide              → affiche ce message");
+    console.log("  redemarrer        → déclenche une relance manuelle du jeu (test du watchdog)");
     console.log("  exit / Ctrl+C    → quitter");
 
     console.log("\n── Modes ───────────────────────────────────────────────");
@@ -131,6 +132,28 @@ async function simulateDonation(keyword: string, amount: string): Promise<void> 
         const data: unknown = await res.json();
         if (res.ok && !(data && typeof data === "object" && "error" in data)) {
             console.log(`✅ Don simulé : ${keyword} → ${amount}`);
+        } else {
+            console.log(`⚠️  Réponse ${res.status.toString()} : ${JSON.stringify(data)}`);
+        }
+    } catch (e: unknown) {
+        console.error(`❌ Erreur réseau : ${(e as Error).message}`);
+        console.error(`   URL : ${url}`);
+    }
+}
+
+/**
+ * Déclenche manuellement une relance du jeu, comme si le GameWatchdogService
+ * avait détecté un plantage (message de redémarrage sur l'overlay, pause du
+ * vote Twitch, arrêt puis relance de Balatro via les scripts npm).
+ */
+async function triggerRestart(): Promise<void> {
+    const url = `${BASE_URL}/admin/restart-game`;
+    try {
+        const res = await fetch(url);
+        const data: unknown = await res.json();
+        if (res.ok) {
+            console.log("✅ Relance du jeu déclenchée (voir les logs du serveur NestJS).");
+            console.log(`   ${JSON.stringify(data)}`);
         } else {
             console.log(`⚠️  Réponse ${res.status.toString()} : ${JSON.stringify(data)}`);
         }
@@ -247,6 +270,8 @@ function startRepl(): void {
                     printHelp();
                 } else if (trimmed === "etat" || trimmed === "state") {
                     await getState();
+                } else if (trimmed === "redemarrer" || trimmed === "restart") {
+                    await triggerRestart();
                 } else if (trimmed.toLowerCase().startsWith("mode")) {
                     const parts = trimmed.split(/\s+/);
                     const newMode = parts[1]?.toLowerCase();

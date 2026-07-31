@@ -6,6 +6,7 @@ import {BID_WAR_UPDATE_EVENT} from "../../shared/bid-war-info";
 import {OverlayService} from "./overlay.service";
 import {TwitchActionDeciderService} from "./twitch-action-decider.service";
 import {StreamlabsDonationCollecterService} from "./streamlabs-donation-collecter.service";
+import {GameWatchdogService} from "./game-watchdog.service";
 
 /**
  * Service dédié à la communication WebSocket vers le front Angular.
@@ -21,7 +22,8 @@ export class OverlaySocketService implements OnModuleInit {
     constructor(private readonly gateway: OverlayGateway,
                 private readonly overlayService: OverlayService,
                 private readonly twitchActionDecider: TwitchActionDeciderService,
-                private readonly bidWarService: StreamlabsDonationCollecterService) {
+                private readonly bidWarService: StreamlabsDonationCollecterService,
+                private readonly gameWatchdogService: GameWatchdogService) {
     }
 
     public onModuleInit(): void {
@@ -31,11 +33,20 @@ export class OverlaySocketService implements OnModuleInit {
         this.bidWarService.bidWarChanged$.subscribe(() => {
             this.broadcastBidWarUpdate();
         });
+        this.gameWatchdogService.restarting$.subscribe(() => {
+            void this.update();
+        });
     }
 
     async update(): Promise<void> {
-        console.log('Send overlay update to clients');
-        this.gateway.server.emit(OVERLAY_UPDATE_EVENT, await this.overlayService.getCurrentInfo());
+        try {
+            console.log('Send overlay update to clients');
+            this.gateway.server.emit(OVERLAY_UPDATE_EVENT, await this.overlayService.getCurrentInfo());
+        } catch (err) {
+            this.logger.warn(
+                `Impossible d'envoyer la mise à jour de l'overlay : ${(err as Error).message}`,
+            );
+        }
     }
 
     broadcastVoteUpdate(): void {

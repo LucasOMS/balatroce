@@ -6,7 +6,14 @@
       class="absolute -inset-(--square-progress-thickness) z-10 pointer-events-none"
     />
 
-    <app-game-overlay [overlayInfo]="overlayInfo()" class="" />
+    @if (restarting()) {
+      <div
+        class="relative w-[1920px] h-[1080px] rounded-[8px] bg-black flex items-center justify-center">
+        <span class="text-white text-4xl text-center px-12">{{ restartMessage() }}</span>
+      </div>
+    } @else {
+      <app-game-overlay [overlayInfo]="overlayInfo()" class="" />
+    }
   </div>
 
 

@@ -5,6 +5,12 @@ import {BehaviorSubject, filter, firstValueFrom, map} from "rxjs";
 
 @Injectable()
 export class BotHttpService implements OnModuleInit {
+    /** Délai maximum (ms) avant d'abandonner une requête vers l'API BalatroBot */
+    private static readonly REQUEST_TIMEOUT_MS = parseInt(
+        process.env.BOT_REQUEST_TIMEOUT_MS ?? "5000",
+        10,
+    );
+
     private readonly ready$ = new BehaviorSubject<boolean>(false);
 
     private readonly logger = new Logger(BotHttpService.name);
@@ -45,11 +51,28 @@ export class BotHttpService implements OnModuleInit {
             this.logger.debug(`→ ${rpcRequest.method}`);
         }
 
-        const response = await fetch(this.baseUrl, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(rpcRequest),
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(
+            () => controller.abort(),
+            BotHttpService.REQUEST_TIMEOUT_MS,
+        );
+
+        let response: Response;
+        try {
+            response = await fetch(this.baseUrl, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(rpcRequest),
+                signal: controller.signal,
+            });
+        } catch (err) {
+            const reason = err instanceof Error ? err.message : String(err);
+            throw new Error(
+                `Impossible de contacter l'API BalatroBot (${this.baseUrl}) : ${reason}`,
+            );
+        } finally {
+            clearTimeout(timeout);
+        }
 
         if (!response.ok) {
             throw new Error(

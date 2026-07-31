@@ -36,6 +36,8 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
   private endTimestamp: number | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private looping = false;
+  /** `true` si le timer a été mis en pause (ex: relance du jeu en cours) */
+  private paused = false;
 
   private readonly actionsResultSubject = new Subject<ChatAction[]>();
   /** Émet la liste des actions à effectuer (par ordre de préférence) à la fin de chaque vote */
@@ -82,6 +84,36 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     this.state = VoteTimerState.STOPPED;
     this.endTimestamp = null;
     this.stateChangeSubject.next();
+  }
+
+  /**
+   * Met en pause le cycle de vote (ex: pendant la relance du jeu suite à un
+   * plantage détecté). Sans effet si déjà en pause. N'arrête pas
+   * définitivement le cycle : {@link resumeTimer} le reprend là où il en était.
+   */
+  public pauseTimer(): void {
+    if (this.paused) {
+      return;
+    }
+    this.paused = true;
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    this.state = VoteTimerState.STOPPED;
+    this.endTimestamp = null;
+    this.stateChangeSubject.next();
+  }
+
+  /** Reprend le cycle de vote mis en pause par {@link pauseTimer}. Sans effet sinon. */
+  public resumeTimer(): void {
+    if (!this.paused) {
+      return;
+    }
+    this.paused = false;
+    if (this.looping) {
+      this.runVotePhase();
+    }
   }
 
   public getState(): VoteTimerState {
@@ -156,6 +188,8 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     return [...grouped.values()];
   }
 }
+
+
 
 
 

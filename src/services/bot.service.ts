@@ -59,6 +59,24 @@ export class BotService {
         });
     }
 
+    /** Sauvegarde la run en cours dans le fichier donné. Ne fonctionne que pendant une run active. */
+    public save(path: string) {
+        this.logger.log(`Saving run to ${path}`);
+        return this.httpService.sendRequest({
+            method: BotMethod.SAVE,
+            params: {path},
+        });
+    }
+
+    /** Charge une run sauvegardée depuis le fichier donné. */
+    public load(path: string) {
+        this.logger.log(`Loading run from ${path}`);
+        return this.httpService.sendRequest({
+            method: BotMethod.LOAD,
+            params: {path},
+        });
+    }
+
     public play(cards: CardIndexes) {
         this.logger.log("Play cards ", cards);
         const playAction: PlayAction = {

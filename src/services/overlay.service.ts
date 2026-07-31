@@ -4,6 +4,7 @@ import {OverlayInfo} from "../../shared/overlay-info";
 import {ActionKeyword} from "../../shared/action-keyword";
 import {GameCycleState} from "../../shared/game-cycle-state";
 import {GameState} from "@shared/game-state";
+import {GameWatchdogService} from "./game-watchdog.service";
 
 /**
  * Responsable de constituer les informations de l'overlay
@@ -11,26 +12,42 @@ import {GameState} from "@shared/game-state";
  */
 @Injectable()
 export class OverlayService {
-    constructor(private readonly botService: BotService) {
+    constructor(
+        private readonly botService: BotService,
+        private readonly gameWatchdogService: GameWatchdogService,
+    ) {
     }
 
     async getCurrentInfo(): Promise<OverlayInfo> {
+        if (this.gameWatchdogService.isRestarting()) {
+            return {
+                availableActions: [],
+                restarting: true,
+                restartMessage: GameWatchdogService.RESTART_MESSAGE,
+            };
+        }
+
         const gameState = await this.botService.getCurrentState();
         return {
             step: gameState.state,
             availableActions: this.getAvailableActions(gameState),
             gameState,
+            restarting: false,
         };
     }
 
     private getAvailableActions(state: GameState): ActionKeyword[] {
         let res: ActionKeyword[] = [];
 
-        const hasJoker = state.jokers.count > 0;
-        const canRearrangeJoker = state.jokers.count > 1;
+        // Certains états (ex: MENU) ne renvoient pas ces champs : on protège l'accès.
+        const jokerCount = state.jokers?.count ?? 0;
+        const consumableCount = state.consumables?.count ?? 0;
 
-        const hasConsumable = state.consumables.count > 0;
-        const canRearrangeConsumable = state.consumables.count > 1;
+        const hasJoker = jokerCount > 0;
+        const canRearrangeJoker = jokerCount > 1;
+
+        const hasConsumable = consumableCount > 0;
+        const canRearrangeConsumable = consumableCount > 1;
 
         const jokerActions: ActionKeyword[] = [
             hasJoker ? ActionKeyword.SellJoker : undefined,
@@ -56,7 +73,7 @@ export class OverlayService {
                 ];
                 break;
             case GameCycleState.SELECTING_HAND:
-                const canDiscard = state.round.discards_left > 0;
+                const canDiscard = (state.round?.discards_left ?? 0) > 0;
 
                 res = [
                     ActionKeyword.Play,

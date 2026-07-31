@@ -28,4 +28,8 @@ export class App {
 
   protected readonly gameState = computed(() => this.overlayInfo()?.gameState ?? null);
   protected readonly availableActions = computed(() => this.overlayInfo()?.availableActions ?? []);
+  protected readonly restarting = computed(() => this.overlayInfo()?.restarting ?? false);
+  protected readonly restartMessage = computed(
+    () => this.overlayInfo()?.restartMessage ?? "Petit problème technique, redémarrage du jeu en cours",
+  );
 }

@@ -261,3 +261,91 @@ dans balatroce :
 | `Mod not loading`                     | Vérifiez que Lovely Injector et Steamodded sont bien installés                        |
 | Port `12346` déjà utilisé             | Utilisez `uvx balatrobot serve --port PORT` et mettez à jour `BotHttpService.baseUrl` |
 | `Connection refused` sur le port 3000 | Vérifiez que balatroce tourne avec `npm run start:dev`                                |
+
+---
+
+## Robustesse & relance automatique du jeu
+
+Le serveur est conçu pour ne **jamais crasher** à cause d'une erreur de communication avec le mod BalatroBot (jeu
+fermé, mod planté, coupure réseau, etc.). Toutes les requêtes vers l'API ont un timeout et sont interceptées ; en cas
+d'échec, le cycle de jeu retente automatiquement au lieu de faire tomber le processus Node.
+
+### GameWatchdogService
+
+Le mod Balatro peut planter et couper son serveur HTTP sans que Balatro (le jeu lui-même) ne se ferme forcément.
+`GameWatchdogService` sonde périodiquement l'API (`health`) et, après plusieurs échecs consécutifs, considère que le
+jeu ne répond plus. Il déclenche alors, **dans cet ordre précis** :
+
+1. La mise en **pause** du timer de vote Twitch Plays (`TwitchActionDeciderService.pauseTimer()`).
+2. L'affichage immédiat sur l'overlay du message *"Petit problème technique, redémarrage du jeu en cours"* à la
+   place du `game-overlay` (via le champ `restarting` de `OverlayInfo`).
+3. **Un court délai** (`WATCHDOG_PRE_KILL_DELAY_MS`) pour garantir que l'overlay a bien reçu et affiché ce message
+   avant de couper le jeu. C'est essentiel car l'overlay affiche une **capture vidéo en direct** de la fenêtre
+   Balatro : si le jeu était tué immédiatement, le flux vidéo pourrait furtivement laisser apparaître le bureau ou
+   une autre fenêtre du PC pendant la fermeture/réouverture.
+4. L'arrêt du jeu (`npm run kill-game`), un court délai (`WATCHDOG_KILL_TO_LAUNCH_DELAY_MS`), puis sa relance
+   (`npm run launch-game`, voir ci-dessous). **Lancer le jeu suffit à redémarrer automatiquement le serveur du
+   mod.**
+5. L'attente que l'API redevienne joignable, puis **le rechargement immédiat de la sauvegarde automatique**
+   (`AutosaveService.loadIfPresent()`, voir section suivante) avant de considérer la relance terminée.
+6. La reprise normale (timer relancé, overlay normal restauré).
+
+> ⚠️ La reprise de la sauvegarde est gérée **directement par `GameWatchdogService.restartGame()`**, et non en
+> attendant que `GameCycleService` repasse par l'état `MENU` de lui-même : ce dernier peut être bloqué en attente
+> d'une action (vote Twitch/admin) au moment du plantage, et ne repasserait alors jamais par sa propre logique de
+> reprise. Pour éviter de rester bloqué dans ce cas, `GameCycleService` interrompt automatiquement toute attente
+> d'action en cours dès qu'une relance démarre (il retente ensuite dès que `GameWatchdogService` confirme que le
+> jeu est de nouveau sain, sauvegarde déjà rechargée).
+
+### Reprise automatique de la partie en cours (autosave)
+
+Après une relance du jeu, Balatro redémarre sur son menu principal : sans précaution, on perdrait la progression en
+cours. Le mécanisme de reprise (`AutosaveService`) fonctionne ainsi :
+
+- À chaque changement d'état pertinent (hors menu), le serveur sauvegarde automatiquement la run en cours via
+  `save` (méthode BalatroBot) dans un fichier temporaire (`AUTOSAVE_PATH`, par défaut dans le dossier temp de
+  l'OS).
+- Dès que le jeu redevient joignable après une relance, `GameWatchdogService` charge directement cette sauvegarde
+  (`load`) pour reprendre la partie interrompue, **avant même** de rendre la main à `GameCycleService`.
+- En solution de repli, `GameCycleService` fait la même vérification s'il atteint lui-même l'état `MENU` (utile si
+  jamais `MENU` était atteint sans passer par une relance détectée par le watchdog).
+- Quand une run se termine normalement (`GAME_OVER` → retour au menu), la sauvegarde automatique est supprimée :
+  la prochaine fois que le menu est atteint, une nouvelle run démarre normalement.
+
+| Variable        | Description                                                                          | Défaut                                             |
+|------------------|----------------------------------------------------------------------------------------|-----------------------------------------------------|
+| `AUTOSAVE_PATH`  | Chemin du fichier de sauvegarde automatique utilisé pour la reprise après une relance | `<dossier temp de l'OS>/balatroce-autosave.jkr`    |
+
+### Tester le watchdog sans attendre un vrai plantage
+
+Une route d'administration permet de déclencher manuellement toute la séquence de relance ci-dessus, comme si le
+watchdog avait réellement détecté un plantage :
+
+```bash
+curl http://localhost:3000/admin/restart-game
+```
+
+Ou plus simplement avec `npm run emulate-commands`, en tapant la commande `redemarrer` (ou `restart`) dans le REPL.
+
+### Scripts npm dédiés (Windows)
+
+Pour faciliter la maintenance, les commandes système utilisées pour relancer le jeu sont centralisées dans
+`package.json` plutôt qu'en dur dans le code :
+
+| Script                 | Rôle                                                                    |
+|------------------------|--------------------------------------------------------------------------|
+| `npm run kill-game`    | Force la fermeture de `Balatro.exe` (sans erreur s'il n'est pas lancé)  |
+| `npm run launch-game`  | Relance le jeu via le protocole Steam (`steam://rungameid/2379780`)    |
+| `npm run restart-game` | Enchaîne `kill-game` puis `launch-game` (avec un court délai)          |
+
+### Variables d'environnement
+
+| Variable                          | Description                                                        | Défaut  |
+|-------------------------------------|--------------------------------------------------------------------|---------|
+| `BOT_REQUEST_TIMEOUT_MS`            | Timeout (ms) d'une requête vers l'API BalatroBot                   | `5000`  |
+| `WATCHDOG_CHECK_INTERVAL_MS`        | Intervalle (ms) entre deux health checks                           | `5000`  |
+| `WATCHDOG_FAILURE_THRESHOLD`        | Nombre d'échecs consécutifs avant de déclencher une relance        | `3`     |
+| `WATCHDOG_PRE_KILL_DELAY_MS`        | Délai (ms) entre l'affichage du message overlay et l'arrêt du jeu  | `2000`  |
+| `WATCHDOG_KILL_TO_LAUNCH_DELAY_MS`  | Délai (ms) entre l'arrêt et la relance du jeu                      | `3000`  |
+| `WATCHDOG_RETRY_MS`                 | Délai (ms) avant de resonder l'API après une relance               | `5000`  |
+

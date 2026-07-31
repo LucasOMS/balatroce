@@ -1,7 +1,7 @@
 import {Injectable, Logger, OnModuleInit} from "@nestjs/common";
 import {CardSet, GameCycleState, GameState} from "src/interfaces/game-state";
 import {BotService} from "./bot.service";
-import {firstValueFrom, Subject} from "rxjs";
+import {filter, firstValueFrom, race, Subject, switchMap, throwError} from "rxjs";
 import {ChatAction} from "../interfaces/chat-action";
 import {BotMethod} from "../interfaces/bot-request";
 import {PlayAction} from "../interfaces/actions/play-or-discard.action";
@@ -12,9 +12,18 @@ import {SellConsumableAction, SellJokerAction} from "../interfaces/actions/sell-
 import {BuyAction} from "../interfaces/actions/shop.action";
 import {OverlaySocketService} from "./overlay-socket.service";
 import {TwitchActionDeciderService} from "./twitch-action-decider.service";
+import {GameWatchdogService} from "./game-watchdog.service";
+import {AutosaveService} from "./autosave.service";
+
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 @Injectable()
 export class GameCycleService implements OnModuleInit {
+    /** Délai (ms) avant de retenter après une erreur non liée à une relance en cours */
+    private static readonly RETRY_DELAY_MS = 2000;
+
     private currentGameState: GameState;
     private readonly actionsSubject = new Subject<ChatAction>();
 
@@ -23,6 +32,8 @@ export class GameCycleService implements OnModuleInit {
         private readonly logger: Logger,
         private readonly overlaySocketService: OverlaySocketService,
         private readonly twitchActionDecider: TwitchActionDeciderService,
+        private readonly gameWatchdogService: GameWatchdogService,
+        private readonly autosaveService: AutosaveService,
     ) {
     }
 
@@ -240,7 +251,32 @@ export class GameCycleService implements OnModuleInit {
         this.actionsSubject.next(validAction);
     }
 
-    private async nextStep() {
+    /**
+     * Boucle principale du cycle de jeu. Ne doit jamais se terminer ni lever
+     * d'exception : toute erreur (communication coupée, jeu qui plante, etc.)
+     * est interceptée, journalisée, puis on retente après avoir attendu que
+     * le {@link GameWatchdogService} confirme que le jeu répond de nouveau
+     * (ou après un court délai si aucune relance n'est en cours).
+     */
+    private async nextStep(): Promise<void> {
+        while (true) {
+            try {
+                await this.runStep();
+            } catch (err) {
+                this.logger.warn(
+                    `Erreur pendant le cycle de jeu, nouvelle tentative : ${(err as Error).message}`,
+                );
+                if (this.gameWatchdogService.isRestarting()) {
+                    await this.gameWatchdogService.awaitHealthy();
+                } else {
+                    await sleep(GameCycleService.RETRY_DELAY_MS);
+                }
+            }
+        }
+    }
+
+    /** Exécute une itération du cycle de jeu. Peut lever une exception. */
+    private async runStep(): Promise<void> {
         let didAutoAction = false;
         do {
             didAutoAction = false;
@@ -248,11 +284,20 @@ export class GameCycleService implements OnModuleInit {
             switch (this.currentGameState.state) {
                 case GameCycleState.GAME_OVER:
                     await this.botService.goToMenu();
+                    // La run est terminée : plus besoin de la sauvegarde automatique.
+                    this.autosaveService.clear();
                     didAutoAction = true;
                     break;
 
                 case GameCycleState.MENU:
-                    await this.botService.startRun();
+                    // Solution de repli : normalement la reprise après une relance
+                    // est gérée directement par GameWatchdogService.restartGame()
+                    // (voir autosaveService.loadIfPresent() là-bas), mais on
+                    // couvre aussi le cas où MENU serait atteint sans être passé
+                    // par une relance détectée par le watchdog.
+                    if (!(await this.autosaveService.loadIfPresent())) {
+                        await this.botService.startRun();
+                    }
                     didAutoAction = true;
                     break;
 
@@ -262,18 +307,39 @@ export class GameCycleService implements OnModuleInit {
                     break;
             }
             console.log('New game cycle state : ', this.currentGameState.state);
+            await this.autosaveService.trySave(this.currentGameState);
         } while (didAutoAction);
 
         await this.overlaySocketService.update();
 
         this.logger.log("Attente d'une action");
-        const action = await firstValueFrom(this.actionsSubject.asObservable());
+        const action = await this.waitForNextAction();
         await this.botService.useRaw(action);
 
         this.currentGameState = await this.botService.getCurrentState();
         console.log('New game cycle state : ', this.currentGameState.state);
+        await this.autosaveService.trySave(this.currentGameState);
+    }
 
-        await this.nextStep();
+    /**
+     * Attend la prochaine action à exécuter, mais abandonne immédiatement
+     * cette attente si une relance du jeu démarre entre-temps (le jeu a
+     * planté / ne répond plus). Sans cette interruption, si le cycle de jeu
+     * est bloqué ici en attente d'une action au moment du plantage, il ne
+     * repasserait jamais par la logique de reprise de partie tant qu'aucune
+     * nouvelle action n'arrive (et le timer de vote est justement mis en
+     * pause pendant la relance, donc aucune action n'arriverait jamais).
+     */
+    private waitForNextAction(): Promise<ChatAction> {
+        const restartInterrupt$ = this.gameWatchdogService.restarting$.pipe(
+            filter((restarting) => restarting),
+            switchMap(() =>
+                throwError(
+                    () => new Error("Relance du jeu détectée : abandon de l'attente d'une action"),
+                ),
+            ),
+        );
+        return firstValueFrom(race(this.actionsSubject.asObservable(), restartInterrupt$));
     }
 }
 
