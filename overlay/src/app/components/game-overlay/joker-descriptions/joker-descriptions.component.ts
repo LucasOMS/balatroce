@@ -33,7 +33,7 @@ import {JOKER_DESCRIPTIONS} from '../../../const/card-descriptions';
       top: calc(anchor(top) - 110px);
       left: calc(anchor(left) + 519px);
       width: 843px;
-      height: var(--joker-consumable-height);
+      height: var(--joker-card-height);
 
       display: flex;
       justify-content: center;

@@ -3,7 +3,7 @@
 @source "./**/*.{ts,html}";
 
 @theme static {
-  --joker-consumable-height: 150px;
+  --joker-card-height: 150px;
   --side-overlay-width: 425px;
 }
 

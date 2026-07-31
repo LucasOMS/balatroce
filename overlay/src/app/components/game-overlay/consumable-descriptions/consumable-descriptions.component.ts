@@ -34,7 +34,7 @@ import {OverlaySocket} from '../../../services/overlay-socket';
       top: calc(anchor(top) - 110px);
       left: calc(anchor(left) + 1379px);
       width: 390px;
-      height: var(--joker-consumable-height);
+      height: var(--joker-card-height);
       display: flex;
 
       display: flex;

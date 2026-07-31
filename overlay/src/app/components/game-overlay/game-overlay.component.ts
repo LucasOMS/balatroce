@@ -13,13 +13,12 @@ import {ShopPackDescriptionsComponent} from './shop-pack-descriptions/shop-pack-
 import {ConsumableDescriptionsComponent} from './consumable-descriptions/consumable-descriptions.component';
 import {JokerDescriptionsComponent} from './joker-descriptions/joker-descriptions.component';
 import {OverlayInfo} from '@shared/overlay-info';
-import {AvailableActionsComponent} from '../overlay/available-actions/available-actions.component';
 import {SealDescriptionsComponent} from './seal-descriptions/seal-descriptions.component';
+import {PackOpeningComponent} from './pack-opening/pack-opening.component';
 
 @Component({
   selector: "app-game-overlay",
   imports: [
-    AvailableActionsComponent,
     JokerNumbersComponent,
     CardNumbersComponent,
     ShopCardDescriptionsComponent,
@@ -33,6 +32,7 @@ import {SealDescriptionsComponent} from './seal-descriptions/seal-descriptions.c
     ConsumableDescriptionsComponent,
     JokerDescriptionsComponent,
     SealDescriptionsComponent,
+    PackOpeningComponent,
   ],
   host: {class: 'block'},
   templateUrl: "./game-overlay.component.html",

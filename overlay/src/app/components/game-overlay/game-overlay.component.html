@@ -89,10 +89,18 @@
       />
     }
 
+    <!-- Opening booster through SMODS mods -->
+    @if (gameCycleState === GameCycleState.SMODS_BOOSTER_OPENED && state.pack) {
+      <app-pack-opening
+        class="absolute z-10 top-0 left-0 w-full h-full"
+        [handSize]="state.hand.limit"
+        [pack]="state.pack"
+      />
+    }
 
     <!-- Composants toujours visibles -->
     <app-joker-descriptions
-      class="absolute z-30 top-0 left-0 w-full h-full"
+      class="absolute z-30 top-0 left-0 w-full h-full pointer-events-none"
       [jokers]="state.jokers"
     />
 

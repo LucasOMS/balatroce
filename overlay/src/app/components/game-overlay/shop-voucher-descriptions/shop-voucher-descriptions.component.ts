@@ -8,7 +8,7 @@ import {OverlaySocket} from '../../../services/overlay-socket';
   selector: "app-shop-voucher-descriptions",
   host: {class: "block"},
   template: `
-    @if (count() === 1) {
+    @if (count() > 0 && count() < 3) {
       <div class="voucher-count-{{ count() }}">
         @for (voucherDesc of descriptions(); track voucherDesc) {
           @if (voucherDesc.length > 0) {
@@ -30,6 +30,24 @@ import {OverlaySocket} from '../../../services/overlay-socket';
         bottom: 85px;
         font-size: 24px;
         left: 592px;
+      }
+    }
+
+    .voucher-count-2 {
+      > * {
+        height: 230px
+      }
+
+      > :nth-child(1) {
+        bottom: 85px;
+        font-size: 24px;
+        left: 662px;
+      }
+
+      > :nth-child(2) {
+        bottom: 85px;
+        font-size: 24px;
+        left: 852px;
       }
     }
   `

@@ -5,7 +5,7 @@ import {Area} from "@shared/game-state";
   selector: "app-shop-voucher-numbers",
   host: {class: "block"},
   template: `
-    @if (count() === 1) {
+    @if (count() > 0 && count() < 3) {
       <div class="voucher-count-{{ count() }}">
         @for (num of numbers(); track num) {
           <div class="voucher-number text-outline-2">
@@ -50,15 +50,13 @@ import {Area} from "@shared/game-state";
 
     .voucher-count-2 {
       > :nth-child(1) {
-        bottom: 273px;
-        left: 1398px;
-        rotate: -2deg;
+        bottom: 25px;
+        left: 677px;
       }
 
       > :nth-child(2) {
-        bottom: 273px;
-        left: 1612px;
-        rotate: 2deg;
+        bottom: 25px;
+        left: 866px;
       }
     }
 
