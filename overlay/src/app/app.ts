@@ -4,6 +4,7 @@ import {OverlaySocket} from './services/overlay-socket';
 import {BidWarComponent} from './components/overlay/bid-war/bid-war.component';
 import {VoteCountComponent} from './components/overlay/vote-count/vote-count.component';
 import {DelayCountComponent} from './components/game-overlay/delay-count/delay-count.component';
+import {AvailableActionsComponent} from './components/overlay/available-actions/available-actions.component';
 
 @Component({
   selector: "app-root",
@@ -12,6 +13,7 @@ import {DelayCountComponent} from './components/game-overlay/delay-count/delay-c
     BidWarComponent,
     VoteCountComponent,
     DelayCountComponent,
+    AvailableActionsComponent,
   ],
   templateUrl: `./app.html`,
 })

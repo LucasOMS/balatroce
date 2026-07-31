@@ -4,6 +4,7 @@
 
 @theme static {
   --joker-consumable-height: 150px;
+  --side-overlay-width: 425px;
 }
 
 @theme {

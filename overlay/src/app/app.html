@@ -11,11 +11,16 @@
 
 
   <!-- Toujours visible, même hors partie (menu, chargement, etc.) -->
-  <app-vote-count
-    class="absolute z-20 top-0 left-0 w-full h-full pointer-events-none"
-  />
 
-  <app-bid-war
-    class="absolute z-20 bottom-2 left-22 w-[400px] pointer-events-none"
-  />
+
+  <div class="flex flex-col items-center justify-start gap-2 absolute z-10 right-1.5 w-(--side-overlay-width) top-1.5 bottom-1.5 pointer-events-none">
+    <app-bid-war class="w-[400px] pointer-events-none" />
+
+    <app-vote-count class="w-full" />
+
+    <app-available-actions
+      class="w-full"
+      [actions]="availableActions()"
+    />
+  </div>
 </div>

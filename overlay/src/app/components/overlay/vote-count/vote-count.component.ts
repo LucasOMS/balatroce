@@ -6,7 +6,7 @@ import {CardComponent} from '../../card.component';
   selector: "app-vote-count",
   host: {class: "block"},
   template: `
-    <app-card title="Votes" class="absolute top-10 right-1.5 min-w-[260px]">
+    <app-card title="Votes">
       @for (entry of voteCounts(); track entry.label) {
         <div class="flex gap-2 justify-between items-baseline">
           <div class="text-[24px]">{{ entry.label }}</div>
