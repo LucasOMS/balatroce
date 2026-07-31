@@ -24,8 +24,6 @@ import {CardComponent} from '../../card.component';
         </div>
       </app-card>
     }
-
-
   `,
   styles: `
     .seal-image {

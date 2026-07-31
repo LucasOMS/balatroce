@@ -1,7 +1,8 @@
-import {Component, computed, input} from "@angular/core";
+import {Component, computed, inject, input} from "@angular/core";
 import {Card} from "@shared/game-state";
 import {CardComponent} from '../../card.component';
 import {getCardDescription} from '../../../const/card-descriptions';
+import {OverlaySocket} from '../../../services/overlay-socket';
 
 @Component({
   selector: "app-shop-card-descriptions",
@@ -60,6 +61,8 @@ import {getCardDescription} from '../../../const/card-descriptions';
   `
 })
 export class ShopCardDescriptionsComponent {
+  private readonly overlaySocket = inject(OverlaySocket);
+
   readonly shopCards = input<Card[]>([]);
 
   protected readonly count = computed(() => this.shopCards()?.length ?? 0);
@@ -69,7 +72,7 @@ export class ShopCardDescriptionsComponent {
     if (!cards) {
       return [];
     }
-    return cards.map(card => getCardDescription(card));
+    return cards.map(card => getCardDescription(card, this.overlaySocket.overlayInfo()?.gameState?.hands));
   });
 }
 

@@ -1,8 +1,9 @@
-import {Component, computed, input} from "@angular/core";
+import {Component, computed, inject, input} from "@angular/core";
 import {Area} from "@shared/game-state";
 import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component';
 import {CardComponent} from '../../card.component';
 import {getCardDescription} from '../../../const/card-descriptions';
+import {OverlaySocket} from '../../../services/overlay-socket';
 
 @Component({
   selector: "app-consumable-descriptions",
@@ -18,7 +19,7 @@ import {getCardDescription} from '../../../const/card-descriptions';
           @if (desc.length > 0) {
             <app-card class="consumable-description flex items-center justify-center rounded-[16px] text-center">
               <app-auto-fit-text baseFontSize="24" class="**:items-center">
-                {{ desc }}
+                <span [innerHTML]="desc"></span>
               </app-auto-fit-text>
             </app-card>
           }
@@ -66,12 +67,14 @@ import {getCardDescription} from '../../../const/card-descriptions';
   `
 })
 export class ConsumableDescriptionsComponent {
+  private readonly overlaySocket = inject(OverlaySocket);
+
   readonly consumables = input.required<Area>();
 
   protected readonly count = computed(() => this.consumables().count ?? 0);
 
   protected readonly descriptions = computed<string[]>(() =>
-    this.consumables().cards.map(card => getCardDescription(card))
+    this.consumables().cards.map(card => getCardDescription(card, this.overlaySocket.overlayInfo()?.gameState?.hands))
   );
 }
 

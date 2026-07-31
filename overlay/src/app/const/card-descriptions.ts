@@ -1,4 +1,4 @@
-import {Card} from "@shared/game-state"
+import {Card, CardSet, GameState} from "@shared/game-state"
 
 export const JOKER_DESCRIPTIONS: Record<string, string> = {
   "j_joker": '<span class="text-mult">+4</span> Multi.',
@@ -262,7 +262,51 @@ const ALL_DESCRIPTIONS: Record<string, string> = {
 }
 
 /** Résout la description française statique d'une carte avec repli sur l'effet fourni par le jeu. */
-export function getCardDescription(card: Card): string {
-  return ALL_DESCRIPTIONS[card.key] ?? card.value.effect ?? '';
+export function getCardDescription(card: Card, hands?: GameState['hands']): string {
+  let description = ALL_DESCRIPTIONS[card.key] ?? card.value.effect ?? '';
+  if (card.set === CardSet.PLANET && hands) {
+    let handLevel: number = 1;
+    switch (card.key) {
+      case 'c_mercury':
+        handLevel = hands['Pair']?.level ?? 1;
+        break;
+      case 'c_venus':
+        handLevel = hands['Three of a Kind']?.level ?? 1;
+        break;
+      case 'c_earth':
+        handLevel = hands['Full House']?.level ?? 1;
+        break;
+      case 'c_mars':
+        handLevel = hands['Four of a Kind']?.level ?? 1;
+        break;
+      case 'c_jupiter':
+        handLevel = hands['Flush']?.level ?? 1;
+        break;
+      case 'c_saturn':
+        handLevel = hands['Straight']?.level ?? 1;
+        break;
+      case 'c_uranus':
+        handLevel = hands['Two Pair']?.level ?? 1;
+        break;
+      case 'c_neptune':
+        handLevel = hands['Straight Flush']?.level ?? 1;
+        break;
+      case 'c_pluto':
+        handLevel = hands['High Card']?.level ?? 1;
+        break;
+      case 'c_planet_x':
+        handLevel = hands['Five of a Kind']?.level ?? 1;
+        break;
+      case 'c_ceres':
+        handLevel = hands['Flush House']?.level ?? 1;
+        break;
+      case 'c_eris':
+        handLevel = hands['Flush Five']?.level ?? 1;
+        break;
+    }
+    description = `(niv. ${handLevel}) ${description}`
+  }
+
+  return description;
 }
 
