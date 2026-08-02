@@ -3,8 +3,8 @@ import { OverlayService } from "../services/overlay.service";
 import { OverlayInfo } from "../../shared/overlay-info";
 import { TwitchActionDeciderService } from "../services/twitch-action-decider.service";
 import type { TwitchVoteInfo } from "../../shared/twitch-vote-info";
-import type { BidWarInfo } from "../../shared/bid-war-info";
-import { StreamlabsDonationCollecterService } from "../services/streamlabs-donation-collecter.service";
+import type { ModeTimerInfo } from "../../shared/mode-timer-info";
+import { ModeManagerService } from "../services/mode-manager.service";
 import { GameWatchdogService } from "../services/game-watchdog.service";
 
 @Controller("overlay")
@@ -14,7 +14,7 @@ export class OverlayController {
   constructor(
     private readonly overlayService: OverlayService,
     private readonly twitchActionDecider: TwitchActionDeciderService,
-    private readonly bidWarService: StreamlabsDonationCollecterService,
+    private readonly modeManagerService: ModeManagerService,
     private readonly gameWatchdogService: GameWatchdogService,
   ) {}
 
@@ -41,10 +41,10 @@ export class OverlayController {
     return this.twitchActionDecider.getCurrentVoteInfo();
   }
 
-  /** Retourne l'état courant de la bid war (score de chaque stratégie, montant total, nombre de dons) */
-  @Get("bid-war-state")
-  getBidWarState(): BidWarInfo {
-    return this.bidWarService.getCurrentInfo();
+  /** Retourne l'état courant du minuteur de mode (mode actuel, fin de phase, montant de la phase, seuil, total) */
+  @Get("mode-timer-state")
+  getModeTimerState(): ModeTimerInfo {
+    return this.modeManagerService.getCurrentInfo();
   }
 }
 

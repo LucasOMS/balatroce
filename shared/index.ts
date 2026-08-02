@@ -23,9 +23,9 @@ export type { OverlayInfo } from "./overlay-info";
 export { VoteTimerState } from "./timer-state";
 export { TWITCH_VOTE_UPDATE_EVENT } from "./twitch-vote-info";
 export type { TwitchVoteInfo, VoteCountEntry } from "./twitch-vote-info";
-export { BidWarKeyword } from "./bid-war-keyword";
-export { BID_WAR_UPDATE_EVENT } from "./bid-war-info";
-export type { BidWarInfo } from "./bid-war-info";
+export { ActionMode } from "./action-mode";
+export { MODE_TIMER_UPDATE_EVENT } from "./mode-timer-info";
+export type { ModeTimerInfo } from "./mode-timer-info";
 export { CLOCK_SYNC_EVENT } from "./clock-sync";
 export type { ClockSyncRequest, ClockSyncResponse } from "./clock-sync";
 

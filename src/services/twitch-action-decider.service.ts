@@ -9,16 +9,17 @@ import { DemocracyStrategy } from "./twitch/democracy-strategy";
 import { AnarchyStrategy } from "./twitch/anarchy-strategy";
 import { VoteTimerState } from "../../shared/timer-state";
 import { TwitchVoteInfo } from "../../shared/twitch-vote-info";
-import { BidWarKeyword } from "../../shared/bid-war-keyword";
-import { StreamlabsDonationCollecterService } from "./streamlabs-donation-collecter.service";
+import { ActionMode } from "../../shared/action-mode";
+import { ModeManagerService } from "./mode-manager.service";
 
 /**
  * Décide quelle(s) action(s) effectuer à partir des messages du chat collectés
  * par TwitchMessageCollectorService, et maintient le timer de vote.
  *
  * La stratégie de vote (démocratie ou anarchie) est déterminée à chaque fin de
- * vote par la bid war (StreamlabsDonationCollecterService), en fonction de la
- * stratégie qui a reçu le plus de dons.
+ * vote par le mode courant (ModeManagerService), qui change automatiquement
+ * après un certain temps ou immédiatement si un montant de dons suffisant est
+ * atteint.
  *
  * Variables d'environnement :
  * - TWITCH_VOTE_DURATION_MS : durée (ms) de la phase de vote (défaut 20000)
@@ -49,14 +50,14 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
 
   constructor(
     private readonly collector: TwitchMessageCollectorService,
-    private readonly bidWarService: StreamlabsDonationCollecterService,
+    private readonly modeManagerService: ModeManagerService,
   ) {
     this.voteInfoChanged$ = merge(this.stateChangeSubject.asObservable(), this.collector.newMessages$);
   }
 
-  /** Stratégie à utiliser pour le prochain vote, décidée par la bid war en cours */
+  /** Stratégie à utiliser pour le prochain vote, décidée par le mode courant */
   private getStrategy(): VoteStrategy {
-    return this.bidWarService.getLeadingKeyword() === BidWarKeyword.Anarchy
+    return this.modeManagerService.getCurrentMode() === ActionMode.Anarchy
       ? new AnarchyStrategy()
       : new DemocracyStrategy();
   }

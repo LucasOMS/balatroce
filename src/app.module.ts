@@ -10,7 +10,7 @@ import { OverlayService } from "./services/overlay.service";
 import { OverlaySocketService } from "./services/overlay-socket.service";
 import { TwitchMessageCollectorService } from "./services/twitch-message-collector.service";
 import { TwitchActionDeciderService } from "./services/twitch-action-decider.service";
-import { StreamlabsDonationCollecterService } from "./services/streamlabs-donation-collecter.service";
+import { ModeManagerService } from "./services/mode-manager.service";
 import { GameWatchdogService } from "./services/game-watchdog.service";
 import { AutosaveService } from "./services/autosave.service";
 
@@ -27,7 +27,7 @@ import { AutosaveService } from "./services/autosave.service";
     OverlaySocketService,
     TwitchMessageCollectorService,
     TwitchActionDeciderService,
-    StreamlabsDonationCollecterService,
+    ModeManagerService,
     GameWatchdogService,
     AutosaveService,
   ],

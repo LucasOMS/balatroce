@@ -4,8 +4,8 @@ import {auditTime} from "rxjs/operators";
 import {io, Socket} from "socket.io-client";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import {BidWarKeyword} from "../../shared/bid-war-keyword";
-import {BidWarInfo} from "../../shared/bid-war-info";
+import {ActionMode} from "../../shared/action-mode";
+import {ModeTimerInfo} from "../../shared/mode-timer-info";
 
 /** Un don Streamlabs tel que reçu dans le tableau `message` d'un événement "donation" */
 interface StreamlabsDonationEvent {
@@ -15,7 +15,6 @@ interface StreamlabsDonationEvent {
     /** Pseudo du donateur */
     from?: string;
     name?: string;
-    /** Message du don, dans lequel on cherche les BidWarKeyword */
     message?: string;
     amount?: number | string;
     /** true pour les dons de test envoyés depuis le dashboard Streamlabs : pas d'id fiable, à ignorer */
@@ -33,29 +32,49 @@ interface StreamlabsSocketEvent {
     message: StreamlabsDonationEvent[];
 }
 
-const DATA_FILE = path.join(process.cwd(), "data", "bid-war.json");
+/** État persisté du minuteur de mode, sur disque */
+interface PersistedModeState {
+    mode?: ActionMode;
+    phaseEndTimestamp?: number;
+    donationAmount?: number;
+    totalDonationAmount?: number;
+    processedDonationIds?: string[];
+}
+
+const DATA_FILE = path.join(process.cwd(), "data", "mode-timer.json");
 const STREAMLABS_SOCKET_URL = "https://sockets.streamlabs.com";
 /** Types d'événements socket Streamlabs correspondant à un don (dons classiques et caritatifs) */
 const DONATION_EVENT_TYPES = ["donation", "streamlabscharitydonation"];
+/** Mode utilisé par défaut au tout premier démarrage (aucun état persisté) */
+const DEFAULT_MODE = ActionMode.Democracy;
 
 /**
- * Se connecte à la socket Streamlabs pour suivre les dons et les comptabiliser
- * comme des votes pour l'une des deux stratégies de la bid war (démocratie /
- * anarchie), en fonction des BidWarKeyword présents dans le message du don.
+ * Gère le mode de sélection des actions (démocratie / anarchie) :
+ * - le mode change automatiquement au bout de `MODE_PHASE_DURATION_MS`
+ * - il change immédiatement si le montant de dons cumulé depuis le dernier
+ *   changement atteint `MODE_DONATION_THRESHOLD`
+ * - à chaque changement, le montant de la phase est remis à 0, mais le total
+ *   de dons récoltés (statistique globale) continue de s'accumuler
  *
- * Si le message contient les deux mots-clés, le don est ignoré.
- *
- * Un don est également ignoré si :
+ * Se connecte également à la socket Streamlabs pour suivre les dons en temps
+ * réel. Un don est ignoré si :
  * - c'est un don de test (`isTest`), qui n'a pas d'identifiant fiable ;
  * - Streamlabs le rejoue (`repeat`), pour éviter de le comptabiliser en double ;
  * - son identifiant a déjà été traité (sécurité supplémentaire anti-doublon) ;
  * - il cible un autre streamer que celui configuré via TWITCH_CHANNEL (cas des
  *   événements multi-streamers, ex: caritatifs).
  *
- * Persiste son état (scores + nombre de dons + ids déjà traités) dans un
- * fichier JSON, chargé au démarrage.
+ * Persiste son état (mode courant, fin de phase, montant de la phase, total
+ * de dons, ids déjà traités) dans un fichier JSON, chargé au démarrage. Le
+ * serveur (et même le jeu Balatro) peuvent être arrêtés/relancés au milieu
+ * d'une phase sans perdre son avancement : le minuteur repose sur un
+ * timestamp absolu (`phaseEndTimestamp`), jamais mis en pause.
  *
  * Variables d'environnement :
+ * - MODE_PHASE_DURATION_MS : durée (ms) d'une phase avant changement
+ *   automatique de mode (défaut 600000, soit 10 minutes)
+ * - MODE_DONATION_THRESHOLD : montant de dons (cumulé depuis le dernier
+ *   changement) déclenchant un changement de mode immédiat (défaut 50)
  * - STREAMLABS_MOCK : si "true", ne se connecte pas réellement à Streamlabs
  *   (utile en dev/tests, les dons peuvent alors être injectés via TestController)
  * - STREAMLABS_SOCKET_TOKEN : token de connexion à la socket Streamlabs
@@ -68,15 +87,22 @@ const DONATION_EVENT_TYPES = ["donation", "streamlabscharitydonation"];
  *   (nécessaire pour les événements multi-streamers, ex: caritatifs).
  */
 @Injectable()
-export class StreamlabsDonationCollecterService implements OnModuleInit, OnModuleDestroy {
-    private readonly logger = new Logger(StreamlabsDonationCollecterService.name);
+export class ModeManagerService implements OnModuleInit, OnModuleDestroy {
+    static readonly PHASE_DURATION_MS = parseInt(process.env.MODE_PHASE_DURATION_MS ?? "600000", 10);
+    static readonly DONATION_THRESHOLD = parseFloat(process.env.MODE_DONATION_THRESHOLD ?? "50");
+
+    private readonly logger = new Logger(ModeManagerService.name);
     private socket: Socket | null = null;
 
-    private readonly scores: Record<BidWarKeyword, number> = {
-        [BidWarKeyword.Democracy]: 0,
-        [BidWarKeyword.Anarchy]: 0,
-    };
-    private donationCount = 0;
+    private mode: ActionMode = DEFAULT_MODE;
+    /** Timestamp (ms, epoch) auquel la phase en cours se termine (changement automatique) */
+    private phaseEndTimestamp = Date.now() + ModeManagerService.PHASE_DURATION_MS;
+    /** Montant de dons cumulé depuis le dernier changement de mode */
+    private donationAmount = 0;
+    /** Montant total de dons récoltés depuis le début, jamais réinitialisé */
+    private totalDonationAmount = 0;
+
+    private timer: ReturnType<typeof setTimeout> | null = null;
 
     /** Ids des dons déjà traités, pour éviter de les comptabiliser en double */
     private readonly processedDonationIds = new Set<string>();
@@ -85,16 +111,18 @@ export class StreamlabsDonationCollecterService implements OnModuleInit, OnModul
     private readonly streamerLoginByMemberId = new Map<string, string>();
 
     private readonly changeSubject = new Subject<void>();
-    /** Émet à chaque fois que la bid war change (max 1 fois / seconde) */
-    public readonly bidWarChanged$ = this.changeSubject.pipe(auditTime(1000));
+    /** Émet à chaque fois que l'état du minuteur de mode change (max 1 fois / seconde) */
+    public readonly modeChanged$ = this.changeSubject.pipe(auditTime(1000));
 
     public onModuleInit(): void {
         this.loadFromDisk();
         this.loadStreamerMap();
+        this.catchUpIfNeeded();
+        this.scheduleTimer();
 
         if (process.env.STREAMLABS_MOCK === "true") {
             this.logger.warn(
-                "STREAMLABS_MOCK=true : connexion Streamlabs désactivée. Utilisez /debug/donation/:keyword/:amount pour simuler un don.",
+                "STREAMLABS_MOCK=true : connexion Streamlabs désactivée. Utilisez /debug/donation/:amount pour simuler un don.",
             );
             return;
         }
@@ -114,6 +142,10 @@ export class StreamlabsDonationCollecterService implements OnModuleInit, OnModul
             this.socket?.disconnect();
         } catch (err) {
             this.logger.warn(`Erreur lors de la déconnexion de la socket Streamlabs : ${(err as Error).message}`);
+        }
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
         }
     }
 
@@ -210,7 +242,7 @@ export class StreamlabsDonationCollecterService implements OnModuleInit, OnModul
         }
 
         const amount = typeof donation.amount === "string" ? parseFloat(donation.amount) : donation.amount ?? 0;
-        this.registerDonation(donation.message ?? "", amount);
+        this.registerDonation(amount);
     }
 
     /**
@@ -233,51 +265,86 @@ export class StreamlabsDonationCollecterService implements OnModuleInit, OnModul
     }
 
     /**
-     * Enregistre un don à partir de son message : vérifie s'il contient l'un
-     * des BidWarKeyword. Si les deux sont présents (ou aucun), le don est
-     * ignoré. Utilisé aussi bien par la connexion Streamlabs réelle que par
-     * le mock de test.
+     * Enregistre un montant de don : incrémente le montant cumulé de la
+     * phase en cours ainsi que le total global, puis bascule immédiatement
+     * de mode si le seuil est atteint. Utilisé aussi bien par la connexion
+     * Streamlabs réelle que par le mock de test.
      */
-    public registerDonation(message: string, amount: number): void {
-        const lower = message.toLowerCase();
-        const hasDemocracy = lower.includes(BidWarKeyword.Democracy);
-        const hasAnarchy = lower.includes(BidWarKeyword.Anarchy);
+    public registerDonation(amount: number): void {
+        const safeAmount = isNaN(amount) ? 0 : amount;
+        this.donationAmount += safeAmount;
+        this.totalDonationAmount += safeAmount;
 
-        if (hasDemocracy === hasAnarchy) {
-            // Aucun mot-clé, ou les deux à la fois : don ignoré
+        if (this.donationAmount >= ModeManagerService.DONATION_THRESHOLD) {
+            this.switchMode();
             return;
         }
 
-        this.applyDonation(hasDemocracy ? BidWarKeyword.Democracy : BidWarKeyword.Anarchy, amount);
+        this.saveToDisk();
+        this.changeSubject.next();
     }
 
-    /** Crédite directement un montant à une stratégie, sans recherche de mot-clé (utilisé par le mock de debug) */
-    public simulateDonation(keyword: BidWarKeyword, amount: number): void {
-        this.applyDonation(keyword, amount);
+    /** Crédite directement un don, sans passer par Streamlabs (utilisé par le mock de debug) */
+    public simulateDonation(amount: number): void {
+        this.registerDonation(amount);
     }
 
-    /** Stratégie actuellement en tête (démocratie par défaut en cas d'égalité) */
-    public getLeadingKeyword(): BidWarKeyword {
-        return this.scores[BidWarKeyword.Anarchy] > this.scores[BidWarKeyword.Democracy]
-            ? BidWarKeyword.Anarchy
-            : BidWarKeyword.Democracy;
+    /** Mode actuellement actif */
+    public getCurrentMode(): ActionMode {
+        return this.mode;
     }
 
-    /** Construit les informations de bid war à envoyer au front (indépendamment du reste de l'overlay) */
-    public getCurrentInfo(): BidWarInfo {
+    /** Construit les informations du minuteur de mode à envoyer au front (indépendamment du reste de l'overlay) */
+    public getCurrentInfo(): ModeTimerInfo {
         return {
-            scores: {...this.scores},
-            totalAmount: this.scores[BidWarKeyword.Democracy] + this.scores[BidWarKeyword.Anarchy],
-            donationCount: this.donationCount,
+            mode: this.mode,
+            phaseEndTimestamp: this.phaseEndTimestamp,
+            phaseDurationMs: ModeManagerService.PHASE_DURATION_MS,
+            donationAmount: this.donationAmount,
+            donationThreshold: ModeManagerService.DONATION_THRESHOLD,
+            totalDonationAmount: this.totalDonationAmount,
         };
     }
 
-    private applyDonation(keyword: BidWarKeyword, amount: number): void {
-        this.scores[keyword] += isNaN(amount) ? 0 : amount;
-        this.donationCount++;
+    /** Bascule vers l'autre mode : remet le montant de la phase à 0 et redémarre une phase complète. */
+    private switchMode(): void {
+        this.mode = this.mode === ActionMode.Democracy ? ActionMode.Anarchy : ActionMode.Democracy;
+        this.donationAmount = 0;
+        this.phaseEndTimestamp = Date.now() + ModeManagerService.PHASE_DURATION_MS;
+        this.logger.log(`Changement de mode : ${this.mode}`);
 
         this.saveToDisk();
+        this.scheduleTimer();
         this.changeSubject.next();
+    }
+
+    /** (Re)programme le timer de changement automatique de mode sur `phaseEndTimestamp`. */
+    private scheduleTimer(): void {
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+        const delay = Math.max(0, this.phaseEndTimestamp - Date.now());
+        this.timer = setTimeout(() => this.switchMode(), delay);
+    }
+
+    /**
+     * Si le serveur a été arrêté plus longtemps que le temps restant de la
+     * phase en cours (ou que le jeu a coupé net pendant ce temps), la phase
+     * est considérée comme terminée : on bascule immédiatement de mode au
+     * redémarrage plutôt que d'essayer de rattraper plusieurs changements
+     * manqués (un seul rattrapage suffit, le principal étant de ne jamais
+     * mettre le minuteur en pause).
+     */
+    private catchUpIfNeeded(): void {
+        if (this.phaseEndTimestamp > Date.now()) {
+            return;
+        }
+        this.mode = this.mode === ActionMode.Democracy ? ActionMode.Anarchy : ActionMode.Democracy;
+        this.donationAmount = 0;
+        this.phaseEndTimestamp = Date.now() + ModeManagerService.PHASE_DURATION_MS;
+        this.logger.log(`Rattrapage au démarrage : changement de mode : ${this.mode}`);
+        this.saveToDisk();
     }
 
     private loadFromDisk(): void {
@@ -286,20 +353,17 @@ export class StreamlabsDonationCollecterService implements OnModuleInit, OnModul
                 return;
             }
             const raw = fs.readFileSync(DATA_FILE, "utf-8");
-            const parsed = JSON.parse(raw) as {
-                scores?: Partial<Record<BidWarKeyword, number>>;
-                donationCount?: number;
-                processedDonationIds?: string[];
-            };
-            this.scores[BidWarKeyword.Democracy] = parsed.scores?.[BidWarKeyword.Democracy] ?? 0;
-            this.scores[BidWarKeyword.Anarchy] = parsed.scores?.[BidWarKeyword.Anarchy] ?? 0;
-            this.donationCount = parsed.donationCount ?? 0;
+            const parsed = JSON.parse(raw) as PersistedModeState;
+            this.mode = parsed.mode === ActionMode.Anarchy || parsed.mode === ActionMode.Democracy ? parsed.mode : DEFAULT_MODE;
+            this.phaseEndTimestamp = parsed.phaseEndTimestamp ?? Date.now() + ModeManagerService.PHASE_DURATION_MS;
+            this.donationAmount = parsed.donationAmount ?? 0;
+            this.totalDonationAmount = parsed.totalDonationAmount ?? 0;
             for (const id of parsed.processedDonationIds ?? []) {
                 this.processedDonationIds.add(id);
             }
-            this.logger.log(`Bid war chargée depuis ${DATA_FILE}`);
+            this.logger.log(`État du minuteur de mode chargé depuis ${DATA_FILE}`);
         } catch (err) {
-            this.logger.warn(`Impossible de charger la bid war : ${(err as Error).message}`);
+            this.logger.warn(`Impossible de charger l'état du minuteur de mode : ${(err as Error).message}`);
         }
     }
 
@@ -322,28 +386,18 @@ export class StreamlabsDonationCollecterService implements OnModuleInit, OnModul
     private saveToDisk(): void {
         try {
             fs.mkdirSync(path.dirname(DATA_FILE), {recursive: true});
-            fs.writeFileSync(
-                DATA_FILE,
-                JSON.stringify(
-                    {
-                        scores: this.scores,
-                        donationCount: this.donationCount,
-                        processedDonationIds: [...this.processedDonationIds],
-                    },
-                    null,
-                    2,
-                ),
-                "utf-8",
-            );
+            const state: PersistedModeState = {
+                mode: this.mode,
+                phaseEndTimestamp: this.phaseEndTimestamp,
+                donationAmount: this.donationAmount,
+                totalDonationAmount: this.totalDonationAmount,
+                processedDonationIds: [...this.processedDonationIds],
+            };
+            fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2), "utf-8");
         } catch (err) {
-            this.logger.warn(`Impossible de sauvegarder la bid war : ${(err as Error).message}`);
+            this.logger.warn(`Impossible de sauvegarder l'état du minuteur de mode : ${(err as Error).message}`);
         }
     }
 }
-
-
-
-
-
 
 

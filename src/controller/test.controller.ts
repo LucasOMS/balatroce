@@ -6,8 +6,7 @@ import {GameCycleService} from "../services/game-cycle.service";
 import {BotMethod} from "../interfaces/bot-request";
 import {OverlaySocketService} from "../services/overlay-socket.service";
 import {TwitchMessageCollectorService} from "../services/twitch-message-collector.service";
-import {StreamlabsDonationCollecterService} from "../services/streamlabs-donation-collecter.service";
-import {BidWarKeyword} from "../../shared/bid-war-keyword";
+import {ModeManagerService} from "../services/mode-manager.service";
 
 @Controller()
 export class TestController {
@@ -16,7 +15,7 @@ export class TestController {
         private readonly gameCycle: GameCycleService,
         private readonly overlayService: OverlaySocketService,
         private readonly twitchMessageCollector: TwitchMessageCollectorService,
-        private readonly bidWarService: StreamlabsDonationCollecterService,
+        private readonly modeManagerService: ModeManagerService,
     ) {
     }
 
@@ -55,26 +54,23 @@ export class TestController {
     }
 
     /**
-     * Simule un don Streamlabs pour la bid war, comme si un spectateur avait
-     * réellement fait un don avec ce mot-clé dans son message (utilisé par
-     * command-emulation.ts, commande "don").
-     * GET /debug/donation/:keyword/:amount
+     * Simule un don Streamlabs, comme si un spectateur avait réellement fait
+     * un don de ce montant (utilisé par command-emulation.ts, commande "don").
+     * Le don s'ajoute au montant de la phase en cours (et au total global) :
+     * si le seuil configuré (MODE_DONATION_THRESHOLD) est atteint, le mode
+     * change immédiatement.
+     * GET /debug/donation/:amount
      */
-    @Get("debug/donation/:keyword/:amount")
+    @Get("debug/donation/:amount")
     public simulateDonation(
-        @Param("keyword") keyword: string,
         @Param("amount") amount: string,
     ): { ok: boolean } | { error: string } {
         const num = parseFloat(amount);
         if (isNaN(num) || num < 0) {
             return {error: `Montant invalide : "${amount}"`};
         }
-        const kw = Object.values(BidWarKeyword).find((k) => k === keyword.toLowerCase());
-        if (!kw) {
-            return {error: `Mot-clé inconnu : "${keyword}". Valeurs possibles : ${Object.values(BidWarKeyword).join(", ")}`};
-        }
-        console.log(`Don simulé : ${kw} ${num}`);
-        this.bidWarService.simulateDonation(kw, num);
+        console.log(`Don simulé : ${num}`);
+        this.modeManagerService.simulateDonation(num);
         return {ok: true};
     }
 
