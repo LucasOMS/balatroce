@@ -17,6 +17,8 @@ export interface OverlayInfo {
   restarting: boolean;
   /** Message à afficher sur l'overlay pendant la relance (si `restarting` est `true`) */
   restartMessage?: string;
+  /** Message temporaire plein écran à afficher (ex : victoire d'un deck) */
+  announcement?: string;
 }
 
 

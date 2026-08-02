@@ -11,6 +11,11 @@
         class="relative w-[1920px] h-[1080px] rounded-[8px] bg-black flex items-center justify-center">
         <span class="text-white text-4xl text-center px-12">{{ restartMessage() }}</span>
       </div>
+    } @else if (announcement()) {
+      <div
+        class="relative w-[1920px] h-[1080px] rounded-[8px] bg-black flex items-center justify-center">
+        <span class="text-white text-4xl text-center px-12">{{ announcement() }}</span>
+      </div>
     } @else {
       <app-game-overlay [overlayInfo]="overlayInfo()" class="" />
     }

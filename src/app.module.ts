@@ -17,6 +17,8 @@ import { TwitchChatService } from "./services/twitch-chat.service";
 import { ChannelEmotesService } from "./services/channel-emotes.service";
 import { ChatGateway } from "./gateways/chat.gateway";
 import { ChatSocketService } from "./services/chat-socket.service";
+import { ProgressionService } from "./services/progression.service";
+import { AnnouncementService } from "./services/announcement.service";
 
 @Module({
   imports: [],
@@ -38,6 +40,8 @@ import { ChatSocketService } from "./services/chat-socket.service";
     ChannelEmotesService,
     ChatGateway,
     ChatSocketService,
+    ProgressionService,
+    AnnouncementService,
   ],
   exports: [OverlaySocketService],
 })

@@ -5,6 +5,7 @@ import {ActionKeyword} from "../../shared/action-keyword";
 import {GameCycleState} from "../../shared/game-cycle-state";
 import {GameState} from "@shared/game-state";
 import {GameWatchdogService} from "./game-watchdog.service";
+import {AnnouncementService} from "./announcement.service";
 
 /**
  * Responsable de constituer les informations de l'overlay
@@ -15,6 +16,7 @@ export class OverlayService {
     constructor(
         private readonly botService: BotService,
         private readonly gameWatchdogService: GameWatchdogService,
+        private readonly announcementService: AnnouncementService,
     ) {
     }
 
@@ -24,6 +26,15 @@ export class OverlayService {
                 availableActions: [],
                 restarting: true,
                 restartMessage: GameWatchdogService.RESTART_MESSAGE,
+            };
+        }
+
+        const announcement = this.announcementService.current;
+        if (announcement) {
+            return {
+                availableActions: [],
+                restarting: false,
+                announcement,
             };
         }
 

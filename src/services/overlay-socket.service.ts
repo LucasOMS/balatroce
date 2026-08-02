@@ -7,6 +7,7 @@ import {OverlayService} from "./overlay.service";
 import {TwitchActionDeciderService} from "./twitch-action-decider.service";
 import {ModeManagerService} from "./mode-manager.service";
 import {GameWatchdogService} from "./game-watchdog.service";
+import {AnnouncementService} from "./announcement.service";
 
 /**
  * Service dédié à la communication WebSocket vers le front Angular.
@@ -23,7 +24,8 @@ export class OverlaySocketService implements OnModuleInit {
                 private readonly overlayService: OverlayService,
                 private readonly twitchActionDecider: TwitchActionDeciderService,
                 private readonly modeManagerService: ModeManagerService,
-                private readonly gameWatchdogService: GameWatchdogService) {
+                private readonly gameWatchdogService: GameWatchdogService,
+                private readonly announcementService: AnnouncementService) {
     }
 
     public onModuleInit(): void {
@@ -34,6 +36,9 @@ export class OverlaySocketService implements OnModuleInit {
             this.broadcastModeUpdate();
         });
         this.gameWatchdogService.restarting$.subscribe(() => {
+            void this.update();
+        });
+        this.announcementService.message$.subscribe(() => {
             void this.update();
         });
     }

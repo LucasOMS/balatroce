@@ -40,13 +40,13 @@ export class BotService {
         });
     }
 
-    public startRun() {
-        this.logger.log("Starting a run");
+    public startRun(deck: Deck = Deck.RED, stake: Stake = Stake.WHITE) {
+        this.logger.log(`Starting a run (deck: ${deck}, stake: ${stake})`);
         const startRun: StartRunAction = {
             method: BotMethod.START,
             params: {
-                stake: Stake.WHITE,
-                deck: Deck.RED,
+                stake,
+                deck,
             },
         };
         return this.httpService.sendRequest(startRun);

@@ -34,4 +34,5 @@ export class App {
   protected readonly restartMessage = computed(
     () => this.overlayInfo()?.restartMessage ?? "Petit problème technique, redémarrage du jeu en cours",
   );
+  protected readonly announcement = computed(() => this.overlayInfo()?.announcement ?? null);
 }

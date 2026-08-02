@@ -21,6 +21,7 @@
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "emulate-commands": "ts-node --project tsconfig.debug.json command-emulation.ts",
+        "reset-progression": "ts-node --project tsconfig.debug.json src/scripts/reset-progression.ts",
         "resize-game": "nircmd win setsize title \"Balatro\" 0 0 1920 1112",
         "kill-game": "taskkill /IM Balatro.exe /F /T || exit 0",
         "launch-game": "start \"\" steam://rungameid/2379780",

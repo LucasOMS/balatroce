@@ -14,6 +14,8 @@ import {OverlaySocketService} from "./overlay-socket.service";
 import {TwitchActionDeciderService} from "./twitch-action-decider.service";
 import {GameWatchdogService} from "./game-watchdog.service";
 import {AutosaveService} from "./autosave.service";
+import {ProgressionService} from "./progression.service";
+import {AnnouncementService} from "./announcement.service";
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -23,6 +25,11 @@ function sleep(ms: number): Promise<void> {
 export class GameCycleService implements OnModuleInit {
     /** Délai (ms) avant de retenter après une erreur non liée à une relance en cours */
     private static readonly RETRY_DELAY_MS = 2000;
+
+    /** Message affiché sur l'overlay lorsqu'un deck est terminé avec succès */
+    private static readonly WIN_MESSAGE = "Partie gagnée ! Bravo";
+    /** Durée (ms) d'affichage du message de victoire avant de passer au deck suivant */
+    private static readonly WIN_MESSAGE_DURATION_MS = 5000;
 
     private currentGameState: GameState;
     private readonly actionsSubject = new Subject<ChatAction>();
@@ -34,6 +41,8 @@ export class GameCycleService implements OnModuleInit {
         private readonly twitchActionDecider: TwitchActionDeciderService,
         private readonly gameWatchdogService: GameWatchdogService,
         private readonly autosaveService: AutosaveService,
+        private readonly progressionService: ProgressionService,
+        private readonly announcementService: AnnouncementService,
     ) {
     }
 
@@ -283,6 +292,16 @@ export class GameCycleService implements OnModuleInit {
             this.currentGameState = await this.botService.getCurrentState();
             switch (this.currentGameState.state) {
                 case GameCycleState.GAME_OVER:
+                    if (this.currentGameState.won) {
+                        // Le deck en cours est gagné : on affiche un message de
+                        // félicitations sur l'overlay quelques secondes puis on
+                        // passe au deck/difficulté suivant(e) avant de repartir.
+                        await this.announcementService.announce(
+                            GameCycleService.WIN_MESSAGE,
+                            GameCycleService.WIN_MESSAGE_DURATION_MS,
+                        );
+                        this.progressionService.advance();
+                    }
                     await this.botService.goToMenu();
                     // La run est terminée : plus besoin de la sauvegarde automatique.
                     this.autosaveService.clear();
@@ -296,7 +315,8 @@ export class GameCycleService implements OnModuleInit {
                     // couvre aussi le cas où MENU serait atteint sans être passé
                     // par une relance détectée par le watchdog.
                     if (!(await this.autosaveService.loadIfPresent())) {
-                        await this.botService.startRun();
+                        const {deck, stake} = this.progressionService.getCurrent();
+                        await this.botService.startRun(deck, stake);
                     }
                     didAutoAction = true;
                     break;
