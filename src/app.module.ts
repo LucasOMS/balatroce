@@ -13,6 +13,10 @@ import { TwitchActionDeciderService } from "./services/twitch-action-decider.ser
 import { ModeManagerService } from "./services/mode-manager.service";
 import { GameWatchdogService } from "./services/game-watchdog.service";
 import { AutosaveService } from "./services/autosave.service";
+import { TwitchChatService } from "./services/twitch-chat.service";
+import { ChannelEmotesService } from "./services/channel-emotes.service";
+import { ChatGateway } from "./gateways/chat.gateway";
+import { ChatSocketService } from "./services/chat-socket.service";
 
 @Module({
   imports: [],
@@ -30,6 +34,10 @@ import { AutosaveService } from "./services/autosave.service";
     ModeManagerService,
     GameWatchdogService,
     AutosaveService,
+    TwitchChatService,
+    ChannelEmotesService,
+    ChatGateway,
+    ChatSocketService,
   ],
   exports: [OverlaySocketService],
 })

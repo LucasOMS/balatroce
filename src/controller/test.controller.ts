@@ -7,6 +7,7 @@ import {BotMethod} from "../interfaces/bot-request";
 import {OverlaySocketService} from "../services/overlay-socket.service";
 import {TwitchMessageCollectorService} from "../services/twitch-message-collector.service";
 import {ModeManagerService} from "../services/mode-manager.service";
+import {TwitchChatService} from "../services/twitch-chat.service";
 
 @Controller()
 export class TestController {
@@ -16,6 +17,7 @@ export class TestController {
         private readonly overlayService: OverlaySocketService,
         private readonly twitchMessageCollector: TwitchMessageCollectorService,
         private readonly modeManagerService: ModeManagerService,
+        private readonly twitchChatService: TwitchChatService,
     ) {
     }
 
@@ -50,6 +52,7 @@ export class TestController {
         const m = message.replaceAll("_", " ");
         console.log(`Twitch message from ${user} : ${m}`);
         this.twitchMessageCollector.registerMessage(user, m);
+        this.twitchChatService.registerMessage(user, m);
         return {ok: true};
     }
 

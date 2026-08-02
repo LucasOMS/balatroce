@@ -28,6 +28,8 @@ export { MODE_TIMER_UPDATE_EVENT } from "./mode-timer-info";
 export type { ModeTimerInfo } from "./mode-timer-info";
 export { CLOCK_SYNC_EVENT } from "./clock-sync";
 export type { ClockSyncRequest, ClockSyncResponse } from "./clock-sync";
+export { CHAT_MESSAGE_EVENT, CHAT_HISTORY_EVENT, CHAT_EMOTES_EVENT } from "./chat-message";
+export type { ChatMessage, TwitchEmotePosition, ChatEmoteMap } from "./chat-message";
 
 
 
