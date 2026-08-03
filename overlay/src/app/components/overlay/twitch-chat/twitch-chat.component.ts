@@ -25,17 +25,17 @@ interface DisplayedChatMessage {
   imports: [CardComponent],
   template: `
     <app-card class="flex-1 min-h-0 flex flex-col overflow-hidden">
-      <div #scrollContainer class="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1">
+      <div #scrollContainer class="flex-1 flex-col-reverse min-h-0 overflow-y-clip flex flex-col gap-1 -mt-2">
         @for (item of displayedMessages(); track item.id) {
           <div class="text-[20px] leading-tight break-words" [class.chat-message-enter]="item.animate">
-            <span class="text-zevent-500 font-bold">{{ item.username }}</span><span class="text-white">:</span>
+            <span class="text-zevent-300">{{ item.username }}</span><span class="text-white">:&nbsp;</span>
             @for (segment of item.segments; track $index) {
               @if (segment.type === 'text') {
                 <span class="text-white whitespace-pre-wrap">{{ segment.value }}</span>
               } @else {
                 <img
                   [src]="segment.url" [alt]="segment.alt" [title]="segment.alt"
-                  class="inline-block h-[26px] align-middle mx-0.5" />
+                  class="inline-block h-[26px] align-middle mx-px" />
               }
             }
           </div>
@@ -56,7 +56,7 @@ export class TwitchChatComponent {
       username: message.username,
       animate: message.animate,
       segments: buildChatMessageSegments(message, emotes),
-    }));
+    })).reverse();
   });
 
   constructor() {

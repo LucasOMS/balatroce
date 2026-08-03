@@ -26,9 +26,11 @@ export function buildChatMessageSegments(message: ChatMessage, emotesMap: ChatEm
     if (emote.start < cursor || emote.end < emote.start || emote.end >= text.length) {
       continue;
     }
+
     if (emote.start > cursor) {
       segments.push(...splitTextWithEmotes(text.slice(cursor, emote.start), emotesMap));
     }
+
     const code = text.slice(emote.start, emote.end + 1);
     segments.push({type: "emote", url: twitchEmoteUrl(emote.id), alt: code});
     cursor = emote.end + 1;
@@ -38,7 +40,7 @@ export function buildChatMessageSegments(message: ChatMessage, emotesMap: ChatEm
     segments.push(...splitTextWithEmotes(text.slice(cursor), emotesMap));
   }
 
-  return segments;
+  return removeSpacesBetweenEmotes(segments);
 }
 
 /** Découpe un fragment de texte (sans émote Twitch native) en repérant les émotes BTTV/7TV mot par mot. */
@@ -50,6 +52,7 @@ function splitTextWithEmotes(text: string, emotesMap: ChatEmoteMap): ChatMessage
     if (token === "") {
       continue;
     }
+
     const url = emotesMap[token];
     if (url) {
       segments.push({type: "emote", url, alt: token});
@@ -61,3 +64,13 @@ function splitTextWithEmotes(text: string, emotesMap: ChatEmoteMap): ChatMessage
   return segments;
 }
 
+/** Twitch ne rend pas les espaces situés entre deux émotes consécutives. */
+function removeSpacesBetweenEmotes(segments: ChatMessageSegment[]): ChatMessageSegment[] {
+  return segments.filter((segment, index) => {
+    if (segment.type !== "text" || !/^\s+$/.test(segment.value)) {
+      return true;
+    }
+
+    return !(segments[index - 1]?.type === "emote" && segments[index + 1]?.type === "emote");
+  });
+}
