@@ -24,7 +24,7 @@ interface DisplayedChatMessage {
   host: {class: "flex flex-col min-h-0"},
   imports: [CardComponent],
   template: `
-    <app-card title="Tchat" class="flex-1 min-h-0 flex flex-col overflow-hidden">
+    <app-card class="flex-1 min-h-0 flex flex-col overflow-hidden">
       <div #scrollContainer class="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1 pr-1">
         @for (item of displayedMessages(); track item.id) {
           <div class="text-[20px] leading-tight break-words" [class.chat-message-enter]="item.animate">
@@ -33,8 +33,9 @@ interface DisplayedChatMessage {
               @if (segment.type === 'text') {
                 <span class="text-white whitespace-pre-wrap">{{ segment.value }}</span>
               } @else {
-                <img [src]="segment.url" [alt]="segment.alt" [title]="segment.alt"
-                     class="inline-block h-[26px] align-middle mx-0.5"/>
+                <img
+                  [src]="segment.url" [alt]="segment.alt" [title]="segment.alt"
+                  class="inline-block h-[26px] align-middle mx-0.5" />
               }
             }
           </div>
