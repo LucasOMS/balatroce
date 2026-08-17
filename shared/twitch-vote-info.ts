@@ -19,5 +19,13 @@ export interface TwitchVoteInfo {
   endTimestamp: number | null;
   /** Décompte des votes, du plus voté au moins voté */
   voteCounts: VoteCountEntry[];
+  /**
+   * Libellé de la commande gagnante du dernier vote clos (ex: "jouer 1 2 3"),
+   * ou `null` si aucun vote n'a encore été clos depuis le démarrage. Utilisé
+   * par l'overlay pour afficher la dernière commande utilisée pendant la
+   * transition entre deux votes, à la place de "Aucun vote pour l'instant".
+   */
+  lastWinningLabel: string | null;
 }
+
 

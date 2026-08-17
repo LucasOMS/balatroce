@@ -39,6 +39,8 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
   private looping = false;
   /** `true` si le timer a été mis en pause (ex: relance du jeu en cours) */
   private paused = false;
+  /** Libellé de la commande gagnante du dernier vote clos, affiché sur l'overlay pendant la transition */
+  private lastWinningLabel: string | null = null;
 
   private readonly actionsResultSubject = new Subject<ChatAction[]>();
   /** Émet la liste des actions à effectuer (par ordre de préférence) à la fin de chaque vote */
@@ -134,21 +136,29 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
       voteCounts: [...entries]
         .sort((a, b) => b.count - a.count)
         .map((entry) => ({ label: entry.label, count: entry.count })),
+      lastWinningLabel: this.lastWinningLabel,
     };
   }
 
   private runVotePhase(): void {
     this.state = VoteTimerState.RUNNING;
     this.endTimestamp = Date.now() + TwitchActionDeciderService.VOTE_DURATION_MS;
+    // On ne veut afficher la dernière commande gagnante que pendant la
+    // transition qui suit immédiatement son vote (état DELAY) : elle est
+    // donc effacée dès qu'une nouvelle phase de vote démarre.
+    this.lastWinningLabel = null;
     this.stateChangeSubject.next();
     this.timer = setTimeout(() => this.onVoteEnd(), TwitchActionDeciderService.VOTE_DURATION_MS);
   }
 
   private onVoteEnd(): void {
     const entries = this.computeVoteEntries();
-    const orderedActions = this.getStrategy().decide(entries);
-    this.logger.log(`Fin du vote : ${orderedActions.length.toString()} action(s) ordonnée(s)`);
-    this.actionsResultSubject.next(orderedActions);
+    const orderedEntries = this.getStrategy().decide(entries);
+    this.logger.log(`Fin du vote : ${orderedEntries.length.toString()} action(s) ordonnée(s)`);
+    if (orderedEntries.length > 0) {
+      this.lastWinningLabel = orderedEntries[0].label;
+    }
+    this.actionsResultSubject.next(orderedEntries.map((entry) => entry.action));
     this.collector.clear();
 
     this.state = VoteTimerState.DELAY;

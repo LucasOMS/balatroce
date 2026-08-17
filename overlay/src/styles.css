@@ -17,6 +17,9 @@
   --color-probability: #35bd86;
   --color-money: #f5b244;
 
+  /* Couleur "primaire" utilisée pour attirer l'oeil (ex: flash d'apparition du dernier vote gagnant) */
+  --color-primary-500: #38932C;
+
   --color-zevent-50: #E7F8E6;
   --color-zevent-100: #CFEFCB;
   --color-zevent-200: #A7DE9C;
@@ -113,5 +116,30 @@ body {
 @utility chat-message-enter {
   animation: chat-message-in 220ms ease-out;
 }
+
+/* Animation d'apparition de la dernière commande gagnante affichée entre deux votes :
+   flash sur la couleur primaire pour attirer l'oeil, puis retour au blanc. */
+@keyframes vote-winner-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+    color: var(--color-primary-500);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0);
+    color: var(--color-primary-500);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    color: white;
+  }
+}
+
+@utility vote-winner-flash {
+  animation: vote-winner-in 1400ms ease-out;
+}
+
 
 

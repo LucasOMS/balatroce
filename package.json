@@ -21,11 +21,12 @@
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "emulate-commands": "ts-node --project tsconfig.debug.json command-emulation.ts",
+        "stats:report": "ts-node --project tsconfig.debug.json src/scripts/stats-report.ts",
         "resize-game": "nircmd win setsize title \"Balatro\" 0 0 1920 1112",
         "kill-game": "taskkill /IM Balatro.exe /F /T || exit 0",
         "launch-game": "start \"\" steam://rungameid/2379780",
         "restart-game": "npm run kill-game && timeout /t 3 /nobreak > NUL && npm run launch-game",
-        "load-save": "powershell -NoProfile -Command \"$dest = Join-Path $env:APPDATA 'Balatro\\2'; New-Item -ItemType Directory -Force -Path $dest | Out-Null; Copy-Item -Path '.\\save-files\\*' -Destination $dest -Recurse -Force\""
+        "load-save": "powershell -NoProfile -Command \"$dest = Join-Path $env:APPDATA 'Balatro\\2'; New-Item -ItemType Directory -Force -Path $dest | Out-Null; Copy-Item -Path '.\\ressources\\save-files\\*' -Destination $dest -Recurse -Force\""
     },
     "dependencies": {
         "@nestjs/common": "^11.0.1",

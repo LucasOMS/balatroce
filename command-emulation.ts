@@ -27,8 +27,8 @@
  *                      "user <pseudo>" pour changer l'utilisateur simulé.
  */
 
+import { ActionKeyword } from "@shared/action-keyword";
 import * as readline from "node:readline";
-import {ActionKeyword} from "./src/enums/action-keywords.enum";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 

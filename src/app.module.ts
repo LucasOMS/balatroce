@@ -19,6 +19,7 @@ import { ChatGateway } from "./gateways/chat.gateway";
 import { ChatSocketService } from "./services/chat-socket.service";
 import { ProgressionService } from "./services/progression.service";
 import { AnnouncementService } from "./services/announcement.service";
+import { StatsService } from "./services/stats.service";
 
 @Module({
   imports: [],
@@ -42,6 +43,7 @@ import { AnnouncementService } from "./services/announcement.service";
     ChatSocketService,
     ProgressionService,
     AnnouncementService,
+    StatsService,
   ],
   exports: [OverlaySocketService],
 })

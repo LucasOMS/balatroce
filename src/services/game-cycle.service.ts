@@ -12,6 +12,7 @@ import {GameWatchdogService} from "./game-watchdog.service";
 import {AutosaveService} from "./autosave.service";
 import {ProgressionService} from "./progression.service";
 import {AnnouncementService} from "./announcement.service";
+import {StatsService} from "./stats.service";
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -39,6 +40,7 @@ export class GameCycleService implements OnModuleInit {
         private readonly autosaveService: AutosaveService,
         private readonly progressionService: ProgressionService,
         private readonly announcementService: AnnouncementService,
+        private readonly statsService: StatsService,
     ) {
     }
 
@@ -302,8 +304,10 @@ export class GameCycleService implements OnModuleInit {
         do {
             didAutoAction = false;
             this.currentGameState = await this.botService.getCurrentState();
+            this.statsService.recordGameState(this.currentGameState);
             switch (this.currentGameState.state) {
                 case GameCycleState.GAME_OVER:
+                    this.statsService.recordGameOver(this.currentGameState.won);
                     if (this.currentGameState.won) {
                         // Le deck en cours est gagné : on affiche un message de
                         // félicitations sur l'overlay quelques secondes puis on
@@ -349,6 +353,7 @@ export class GameCycleService implements OnModuleInit {
         await this.botService.useRaw(action);
 
         this.currentGameState = await this.botService.getCurrentState();
+        this.statsService.recordGameState(this.currentGameState);
         console.log('New game cycle state : ', this.currentGameState.state);
         await this.autosaveService.trySave(this.currentGameState);
     }

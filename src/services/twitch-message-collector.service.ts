@@ -3,6 +3,7 @@ import {Subject} from "rxjs";
 import {auditTime} from "rxjs/operators";
 import * as tmi from "tmi.js";
 import {isActionMessage} from "../parsers/parse-all.parser";
+import {StatsService} from "./stats.service";
 
 /**
  * Se connecte anonymement en lecture seule au chat Twitch et enregistre le
@@ -22,6 +23,8 @@ import {isActionMessage} from "../parsers/parse-all.parser";
 export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(TwitchMessageCollectorService.name);
     private client: tmi.Client | null = null;
+
+    constructor(private readonly statsService: StatsService) {}
 
     /** Dernier message (lowercase) de chaque utilisateur, indexé par nom d'utilisateur */
     private readonly lastMessageByUser = new Map<string, string>();
@@ -127,6 +130,7 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
         }
 
         this.lastMessageByUser.set(username, message);
+        this.statsService.recordPlayerCommand(username);
         this.newMessageSubject.next();
     }
 
@@ -145,6 +149,9 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
         return this.lastMessageByUser;
     }
 }
+
+
+
 
 
 
