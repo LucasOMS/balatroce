@@ -43,6 +43,9 @@ body {
   font-family: "M6x11", sans-serif;
 }
 
+@utility action-keyword-letter {
+  @apply text-zevent-400 inline uppercase;
+}
 
 @property --text-outline-color {
   syntax: '<color>';

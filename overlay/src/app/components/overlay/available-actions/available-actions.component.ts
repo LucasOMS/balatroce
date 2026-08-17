@@ -8,33 +8,91 @@ interface Action {
 }
 
 const actionsMetadata: Record<ActionKeyword, Action> = {
-  [ActionKeyword.Play]: {description: 'Jouer une main', example: `${ActionKeyword.Play} 1 4 3`},
-  [ActionKeyword.SelectBlind]: {description: 'Sélectionner la blinde', example: `${ActionKeyword.SelectBlind}`},
-  [ActionKeyword.Discard]: {description: 'Défausser', example: `${ActionKeyword.Discard} 2 3 6`},
+  [ActionKeyword.Play]:
+    {
+      description: '<span class="action-keyword-letter">J</span>ouer une main', example: `${ActionKeyword.Play} 1 4 3`
+    },
+  [ActionKeyword.SelectBlind]:
+    {
+      description: '<span class="action-keyword-letter">S</span>électionner la <span class="action-keyword-letter">b</span>linde',
+      example: `${ActionKeyword.SelectBlind}`
+    },
+  [ActionKeyword.Discard]:
+    {
+      description: '<span class="action-keyword-letter">D</span>éfausser', example: `${ActionKeyword.Discard} 2 3 6`
+    },
   [ActionKeyword.RearrangeHand]: {
-    description: 'Réorganiser la main',
+    description: '<span class="action-keyword-letter">R</span>éorganiser la <span class="action-keyword-letter">m</span>ain',
     example: `${ActionKeyword.RearrangeHand} 1 3 2 4`
   },
   [ActionKeyword.RearrangeConsumables]: {
-    description: 'Réorganiser les consommables',
+    description: '<span class="action-keyword-letter">R</span>éorganiser les <span class="action-keyword-letter">c</span>onsommables',
     example: `${ActionKeyword.RearrangeConsumables} 2 1`
   },
   [ActionKeyword.RearrangeJokers]: {
-    description: 'Réorganiser les jokers',
+    description: '<span class="action-keyword-letter">R</span>éorganiser les <span class="action-keyword-letter">j</span>okers',
     example: `${ActionKeyword.RearrangeJokers} 3 1 2 4`
   },
-  [ActionKeyword.SellConsumable]: {description: 'Vendre un consommable', example: `${ActionKeyword.SellConsumable} 2`},
-  [ActionKeyword.SellJoker]: {description: 'Vendre un joker', example: `${ActionKeyword.SellJoker} 4`},
-  [ActionKeyword.SkipBlind]: {description: 'Passer la blinde', example: `${ActionKeyword.SkipBlind}`},
-  [ActionKeyword.UseConsumable]: {description: 'Utiliser un consommable', example: `${ActionKeyword.UseConsumable} 1`},
-  [ActionKeyword.BuyCard]: {description: 'Acheter une carte', example: `${ActionKeyword.BuyCard} 2`},
-  [ActionKeyword.BuyVoucher]: {description: 'Acheter un coupon', example: `${ActionKeyword.BuyVoucher} 1`},
-  [ActionKeyword.BuyPack]: {description: 'Acheter un pack', example: `${ActionKeyword.BuyPack} 1`},
-  [ActionKeyword.PackSelect]: {description: 'Sélectionner dans le pack', example: `${ActionKeyword.PackSelect} 1`},
-  [ActionKeyword.PackSkip]: {description: 'Passer le pack', example: `${ActionKeyword.PackSkip}`},
-  [ActionKeyword.NextRound]: {description: 'Passer', example: `${ActionKeyword.NextRound}`},
-  [ActionKeyword.Reroll]: {description: 'Relancer le magasin', example: `${ActionKeyword.Reroll}`},
-  [ActionKeyword.StartRun]: {description: 'Commencer une partie', example: `${ActionKeyword.StartRun} WHITE RED`}
+  [ActionKeyword.SellConsumable]:
+    {
+      description: '<span class="action-keyword-letter">V</span>endre un <span class="action-keyword-letter">c</span>onsommable',
+      example: `${ActionKeyword.SellConsumable} 2`
+    },
+  [ActionKeyword.SellJoker]:
+    {
+      description: '<span class="action-keyword-letter">V</span>endre un <span class="action-keyword-letter">j</span>oker',
+      example: `${ActionKeyword.SellJoker} 4`
+    },
+  [ActionKeyword.SkipBlind]:
+    {
+      description: '<span class="action-keyword-letter">P</span>asser la <span class="action-keyword-letter">b</span>linde',
+      example: `${ActionKeyword.SkipBlind}`
+    },
+  [ActionKeyword.UseConsumable]:
+    {
+      description: '<span class="action-keyword-letter">U</span>tiliser un <span class="action-keyword-letter">c</span>onsommable',
+      example: `${ActionKeyword.UseConsumable} 1`
+    },
+  [ActionKeyword.BuyCard]:
+    {
+      description: '<span class="action-keyword-letter">A</span>cheter une <span class="action-keyword-letter">c</span>arte',
+      example: `${ActionKeyword.BuyCard} 2`
+    },
+  [ActionKeyword.BuyVoucher]:
+    {
+      description: '<span class="action-keyword-letter">A</span>cheter un <span class="action-keyword-letter">cou</span>pon',
+      example: `${ActionKeyword.BuyVoucher} 1`
+    },
+  [ActionKeyword.BuyPack]:
+    {
+      description: '<span class="action-keyword-letter">A</span>cheter un <span class="action-keyword-letter">p</span>ack',
+      example: `${ActionKeyword.BuyPack} 1`
+    },
+  [ActionKeyword.PackSelect]:
+    {
+      description: '<span class="action-keyword-letter">S</span>électionner dans le <span class="action-keyword-letter">P</span>ack',
+      example: `${ActionKeyword.PackSelect} 1`
+    },
+  [ActionKeyword.PackSkip]:
+    {
+      description: '<span class="action-keyword-letter">P</span>asser le <span class="action-keyword-letter">p</span>ack',
+      example: `${ActionKeyword.PackSkip}`
+    },
+  [ActionKeyword.NextRound]:
+    {
+      description: '<span class="action-keyword-letter">P</span>asser',
+      example: `${ActionKeyword.NextRound}`
+    },
+  [ActionKeyword.Reroll]:
+    {
+      description: '<span class="action-keyword-letter">R</span>elancer le <span class="action-keyword-letter">M</span>agasin',
+      example: `${ActionKeyword.Reroll}`
+    },
+  [ActionKeyword.StartRun]:
+    {
+      description: '<span class="action-keyword-letter">C</span>ommencer une partie',
+      example: `${ActionKeyword.StartRun} WHITE RED`
+    }
 }
 
 @Component({
@@ -44,8 +102,8 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
     <app-card title="Actions disponibles">
       @for (action of displayedActions(); track action) {
         <div class="flex gap-2 justify-between items-baseline">
-          <div class="text-[26px]">{{ action.description }}</div>
-          <div class="text-[22px]">{{ action.example }}</div>
+          <div class="text-[26px]" [innerHTML]="action.description"></div>
+          <div class="text-[22px] text-right">{{ action.example }}</div>
         </div>
       }
     </app-card>

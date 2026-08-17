@@ -1,21 +1,23 @@
 export enum ActionKeyword {
-  Play = "jouer",
-  SelectBlind = "selectionner",
-  Discard = "retirer",
-  RearrangeHand = "arranger",
-  RearrangeConsumables = "arrangerconso",
-  RearrangeJokers = "arrangerjokers",
-  SellConsumable = "vendreconso",
-  SellJoker = "vendrejoker",
-  SkipBlind = "passer",
-  UseConsumable = "conso",
-  BuyCard = "acheter",
-  BuyVoucher = "achetercoupon",
-  BuyPack = "acheterpack",
-  PackSelect = "prendrepack",
-  PackSkip = "passerpack",
-  NextRound = "quitter",
-  Reroll = "changer",
-  StartRun = "commencer",
+    Play = "j", // jouer
+    SelectBlind = "sb", // selectionner blinde
+    Discard = "d", // défausser
+    RearrangeHand = "rm", // réorganiser main
+    RearrangeConsumables = "rc", // réorganiser consommables
+    RearrangeJokers = "rj", // réorganiser jokers
+    SellConsumable = "vc", // vendre consommable
+    SellJoker = "vj", // vendre joker
+    SkipBlind = "pb", // passer blinde
+    UseConsumable = "uc", // utiliser consommable
+    BuyCard = "ac", // acheter carte
+    BuyVoucher = "acou", // acheter coupon
+    BuyPack = "ap", // acheter pack
+    PackSelect = "sp", // selectionner dans le pack
+    PackSkip = "pp", // passer pack
+    Reroll = "r", // Relancer le magasin
+
+
+    StartRun = "c", // commencer
+    NextRound = "p", // passer
 }
 
