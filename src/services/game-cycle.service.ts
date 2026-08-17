@@ -4,10 +4,6 @@ import {BotService} from "./bot.service";
 import {filter, firstValueFrom, race, Subject, switchMap, throwError} from "rxjs";
 import {ChatAction} from "../interfaces/chat-action";
 import {BotMethod} from "../interfaces/bot-request";
-import {PlayAction} from "../interfaces/actions/play-or-discard.action";
-import {DiscardAction} from "../interfaces/actions/discard.action";
-import {RearrangeAction} from "../interfaces/actions/rearrange-consumables.action";
-import {UseConsumableAction} from "../interfaces/actions/use-consumable.action";
 import {SellConsumableAction, SellJokerAction} from "../interfaces/actions/sell-consumable.action";
 import {BuyAction} from "../interfaces/actions/shop.action";
 import {OverlaySocketService} from "./overlay-socket.service";
@@ -110,6 +106,7 @@ export class GameCycleService implements OnModuleInit {
         }
 
         if (validMethods.every((m) => m !== action.method)) {
+            console.warn('Try to use action that is not valid in current state : ', action, 'current state : ', this.currentGameState.state);
             return false;
         }
 
@@ -127,7 +124,7 @@ export class GameCycleService implements OnModuleInit {
 
         switch (action.method) {
             case BotMethod.PLAY: {
-                const playAction = action as PlayAction;
+                const playAction = action;
                 const cardCount = playAction.params.cards.length;
                 if (cardCount <= 0 || cardCount > 5) {
                     return false;
@@ -135,7 +132,7 @@ export class GameCycleService implements OnModuleInit {
                 break;
             }
             case BotMethod.DISCARD: {
-                const discardAction = action as DiscardAction;
+                const discardAction = action;
                 const cardCount = discardAction.params.cards.length;
                 if (cardCount <= 0) {
                     return false;
@@ -146,7 +143,7 @@ export class GameCycleService implements OnModuleInit {
                 break;
             }
             case BotMethod.REARRANGE: {
-                const rearrangeAction = action as RearrangeAction;
+                const rearrangeAction = action;
                 if ("hand" in rearrangeAction.params) {
                     if (!validateIndexes(handSize, rearrangeAction.params.hand)) {
                         return false;
@@ -168,19 +165,19 @@ export class GameCycleService implements OnModuleInit {
                 break;
             }
             case BotMethod.USE: {
-                const useAction = action as UseConsumableAction;
+                const useAction = action;
                 if (useAction.params.consumable > consumableCount - 1) {
                     return false;
                 }
                 break;
             }
             case BotMethod.SELL: {
-                if ("consumable" in action.params!) {
+                if ("consumable" in action.params) {
                     const sellConsumableAction = action as SellConsumableAction;
                     if (sellConsumableAction.params.consumable > consumableCount - 1) {
                         return false;
                     }
-                } else if ("joker" in action.params!) {
+                } else if ("joker" in action.params) {
                     const sellJokerAction = action as SellJokerAction;
                     if (sellJokerAction.params.joker > jokerCount - 1) {
                         return false;
