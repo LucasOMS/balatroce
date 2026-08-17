@@ -47,7 +47,7 @@ export class GameCycleService implements OnModuleInit {
         this.currentGameState = await this.botService.getCurrentState();
 
         this.twitchActionDecider.actionsResult$.subscribe((actions) => {
-            this.registerChatActions(actions);
+            void this.registerChatActions(actions);
         });
         this.twitchActionDecider.startTimer();
 
@@ -55,6 +55,15 @@ export class GameCycleService implements OnModuleInit {
         void this.nextStep();
     }
 
+    /**
+     * Valide une action par rapport à l'état de jeu actuel (mis en cache).
+     *
+     * Le cache (`this.currentGameState`) doit être rafraîchi par l'appelant
+     * juste avant d'utiliser cette méthode (voir `registerChatAction` /
+     * `registerChatActions`), pour éviter les problèmes d'asynchronisme entre
+     * l'état réel du jeu et l'état en cache côté serveur, tout en évitant de
+     * refaire un appel réseau à chaque action vérifiée.
+     */
     public isActionValid(action: ChatAction): boolean {
         let validMethods: BotMethod[] = [];
         switch (this.currentGameState.state) {
@@ -235,7 +244,10 @@ export class GameCycleService implements OnModuleInit {
         return true;
     }
 
-    public registerChatAction(request: ChatAction) {
+    public async registerChatAction(request: ChatAction): Promise<void> {
+        // Rafraîchit le cache une seule fois, juste avant la validation, pour
+        // éviter d'utiliser un état obsolète sans multiplier les appels réseau.
+        this.currentGameState = await this.botService.getCurrentState();
         if (!this.isActionValid(request)) {
             this.logger.warn("Try to use an invalid chat action : ", request);
             return;
@@ -248,7 +260,10 @@ export class GameCycleService implements OnModuleInit {
      * de la plus préférée à la moins préférée) et enregistre la première qui
      * est valide dans l'état de jeu courant.
      */
-    public registerChatActions(actions: ChatAction[]): void {
+    public async registerChatActions(actions: ChatAction[]): Promise<void> {
+        // Rafraîchit le cache une seule fois, juste avant la validation, pour
+        // éviter d'utiliser un état obsolète sans multiplier les appels réseau.
+        this.currentGameState = await this.botService.getCurrentState();
         const validAction = actions.find((action) => this.isActionValid(action));
         if (!validAction) {
             this.logger.warn("Aucune action valide parmi les résultats du vote : ", actions);

@@ -27,13 +27,13 @@ export class TestController {
     }
 
     @Get("simulate/:message")
-    public simulateMessage(@Param("message") message: string) {
+    public async simulateMessage(@Param("message") message: string): Promise<void> {
         const m = message.replaceAll("_", " ");
         console.log("Message ", m);
         const parsedMessage: ChatAction | null = parseAllParser(m);
         if (parsedMessage) {
             console.log("Valid action", parsedMessage);
-            this.gameCycle.registerChatAction(parsedMessage);
+            await this.gameCycle.registerChatAction(parsedMessage);
         } else {
             console.log("No valid action found");
         }
