@@ -1,0 +1,57 @@
+{
+  "buffer_name": "globals.lua",
+  "entries": [
+    {
+      "patch_source": {
+        "file": "smods\\lovely\\blind_score_mod.toml",
+        "pattern": "RENTAL = HEX('b18f43'),",
+        "patch_type": "pattern"
+      },
+      "regions": [
+        {
+          "start_line": 396,
+          "end_line": 396
+        }
+      ]
+    },
+    {
+      "patch_source": {
+        "file": "smods\\lovely\\mobile_patches.toml",
+        "pattern": "if love.system.getOS() == 'OS X' then",
+        "patch_type": "pattern"
+      },
+      "regions": [
+        {
+          "start_line": 52,
+          "end_line": 62
+        }
+      ]
+    },
+    {
+      "patch_source": {
+        "file": "smods\\lovely\\ui_elements.toml",
+        "pattern": "UIBOX = {},\n",
+        "patch_type": "pattern"
+      },
+      "regions": [
+        {
+          "start_line": 342,
+          "end_line": 342
+        }
+      ]
+    },
+    {
+      "patch_source": {
+        "file": "smods\\lovely\\booster.toml",
+        "pattern": "(?<indent>[\\t ]*)self\\.STATES = \\{",
+        "patch_type": "regex"
+      },
+      "regions": [
+        {
+          "start_line": 295,
+          "end_line": 297
+        }
+      ]
+    }
+  ]
+}
