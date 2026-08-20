@@ -13,6 +13,7 @@ import {AutosaveService} from "./autosave.service";
 import {ProgressionService} from "./progression.service";
 import {AnnouncementService} from "./announcement.service";
 import {StatsService} from "./stats.service";
+import {resolvePerformedAction} from "./twitch/performed-action-resolver";
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -254,6 +255,9 @@ export class GameCycleService implements OnModuleInit {
             this.logger.warn("Try to use an invalid chat action : ", request);
             return;
         }
+        this.twitchActionDecider.setLastPerformedAction(
+            resolvePerformedAction(request, this.currentGameState),
+        );
         this.actionsSubject.next(request);
     }
 
@@ -271,6 +275,9 @@ export class GameCycleService implements OnModuleInit {
             this.logger.warn("Aucune action valide parmi les résultats du vote : ", actions);
             return;
         }
+        this.twitchActionDecider.setLastPerformedAction(
+            resolvePerformedAction(validAction, this.currentGameState),
+        );
         this.actionsSubject.next(validAction);
     }
 

@@ -124,6 +124,12 @@ export type CardColor = 'dark' | 'red' | 'green' | 'light-gray';
       padding: var(--card-padding) var(--card-padding) calc(var(--card-padding) + 4px) var(--card-padding);
 
 
+      /* Quick fix because .absolute cannot override position relative */
+
+      &.absolute {
+        position: absolute;
+      }
+
       &.red {
         --card-bg: var(--color-card-red-bg);
         --card-shadow: var(--color-card-red-shadow);

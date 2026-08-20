@@ -1,31 +1,25 @@
+import { PerformedAction } from "./performed-action";
 import { VoteTimerState } from "./timer-state";
 
-/** Nom de l'événement WebSocket envoyé au front pour les infos de vote Twitch Plays */
+/** WebSocket event name sent to the overlay for Twitch Plays vote information. */
 export const TWITCH_VOTE_UPDATE_EVENT = "twitch:vote-update";
 
-/** Un message unifié et le nombre de votes qu'il a reçu */
+/** A canonicalized message and the number of votes it received. */
 export interface VoteCountEntry {
-  /** Libellé du message tel qu'envoyé dans le chat (ex: "jouer 1 2 3") */
+  /** Label as sent in chat, kept only for the live vote aggregation. */
   label: string;
-  /** Nombre de votes reçus pour ce message (après unification) */
+  /** Number of votes received for this canonical action. */
   count: number;
 }
 
-/** Informations envoyées indépendamment du reste de l'overlay pour le Twitch Plays */
+/** Vote information sent independently from the rest of the overlay state. */
 export interface TwitchVoteInfo {
-  /** État courant du timer de vote */
   state: VoteTimerState;
-  /** Timestamp (ms epoch) de fin de la phase courante, ou null si STOPPED */
   endTimestamp: number | null;
-  /** Décompte des votes, du plus voté au moins voté */
   voteCounts: VoteCountEntry[];
   /**
-   * Libellé de la commande gagnante du dernier vote clos (ex: "jouer 1 2 3"),
-   * ou `null` si aucun vote n'a encore été clos depuis le démarrage. Utilisé
-   * par l'overlay pour afficher la dernière commande utilisée pendant la
-   * transition entre deux votes, à la place de "Aucun vote pour l'instant".
+   * Semantic snapshot of the action selected for execution during the previous
+   * game state. The overlay is responsible for turning it into localized text.
    */
-  lastWinningLabel: string | null;
+  lastPerformedAction: PerformedAction | null;
 }
-
-
