@@ -24,10 +24,19 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
     private readonly logger = new Logger(TwitchMessageCollectorService.name);
     private client: tmi.Client | null = null;
 
-    constructor(private readonly statsService: StatsService) {}
+    constructor(private readonly statsService: StatsService) {
+    }
 
     /** Dernier message (lowercase) de chaque utilisateur, indexé par nom d'utilisateur */
     private readonly lastMessageByUser = new Map<string, string>();
+
+    /**
+     * `true` uniquement pendant la phase de vote active (état RUNNING du
+     * timer). En dehors de cette phase (pause/délai entre deux votes, ou
+     * timer arrêté), tous les messages doivent être ignorés : ils ne doivent
+     * ni être comptabilisés, ni déclencher de mise à jour de l'overlay.
+     */
+    private acceptingVotes = false;
 
     private readonly newMessageSubject = new Subject<void>();
     /** Émet à chaque fois que de nouveaux messages ont été enregistrés (max 1 fois / seconde) */

@@ -103,7 +103,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
       @for (action of displayedActions(); track action) {
         <div class="flex gap-2 justify-between items-baseline">
           <div class="text-[26px]" [innerHTML]="action.description"></div>
-          <div class="text-[22px] text-right">{{ action.example }}</div>
+          <div class="text-[22px] text-primary-500 text-right">{{ action.example }}</div>
         </div>
       }
     </app-card>

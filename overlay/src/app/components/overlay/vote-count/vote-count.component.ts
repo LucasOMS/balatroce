@@ -6,16 +6,19 @@ import {CardComponent} from '../../card.component';
   selector: "app-vote-count",
   host: {class: "block"},
   template: `
-    <app-card title="Votes" class="min-h-[143px]">
+    <app-card class="h-[80px] [--card-padding:8px] px-2! gap-0!">
+      <div class="text-[20px]/[20px] mb-1">Votes</div>
+      <hr class="border-b-1 border-(--card-shadow) mb-0.5" />
+
       @if (totalVoteCount() > 0) {
-        <div class="text-[22px]">
+        <div class="text-[18px]">
           <span class="font-bold">{{ totalVoteCount() }}</span> vote{{ totalVoteCount() > 1 ? 's' : '' }}
         </div>
       } @else {
         @for (winner of lastWinner(); track winner.key) {
-          <div class="text-[20px] vote-winner-flash">{{ winner.label }}</div>
+          <div class="text-[18px] vote-winner-flash">{{ winner.label }}</div>
         } @empty {
-          <div class="text-[20px] italic opacity-70">Aucun vote pour l'instant</div>
+          <div class="text-[18px] italic opacity-70">Aucun vote pour l'instant</div>
         }
       }
     </app-card>

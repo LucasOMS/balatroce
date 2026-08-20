@@ -24,51 +24,46 @@ function formatDuration(ms: number): string {
   imports: [DecimalPipe, CardComponent],
   template: `
 
-    <app-card title="MODE {{ modeLabel() }}" class="flex flex-col gap-1 text-white [--icon-size:36px]">
-      <span class="-mt-1 text-center text-[28px]">Changement de mode dans</span>
+    <div class="flex gap-1">
+      <app-card color="red" class="w-[170px] items-center justify-center text-center text-[32px]/[32px]">
+        Mode<br>{{ modeLabel() }}
+      </app-card>
 
-      <div class="flex gap-2 w-full items-center">
-        <div class="flex-1 flex gap-1 items-center">
-          <div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="var(--icon-size)"
-              width="var(--icon-size)"
-              viewBox="0 -960 960 960"
-              fill="var(--color-zevent-500)">
-              <path d="M600-120q-118 0-210-67T260-360H120v-80h122q-2-11-2-20v-40q0-9 2-20H120v-80h140q38-106 130-173t210-67q69 0 130.5 24T840-748l-70 70q-35-29-78.5-45.5T600-740q-75 0-136.5 38.5T370-600h230v80H344q-2 11-3 20t-1 20q0 11 1 20t3 20h256v80H370q32 63 93.5 101.5T600-220q48 0 92.5-16.5T770-282l70 70q-48 44-109.5 68T600-120Z" />
-            </svg>
-          </div>
+      <app-card class="flex-1 flex flex-row gap-3">
+        <app-card color="green" subtitle="Changement de mode dans" class="flex-1 [--card-padding:12px]">
 
-          <div class="relative w-full h-[48px] bg-black/50 border-2 border-white rounded-[16px] overflow-hidden flex items-center">
+          <div class="relative bg-primary-900 border-2 border-white rounded-lg flex-1 h-4 overflow-hidden">
+            <span class="text-[32px]/[32px] text-white whitespace-nowrap absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              {{ donationAmount() | number: "1.0-2" }}&nbsp;<span class="text-[28px]">€</span>
+            </span>
             <div
-              class="h-full bg-zevent-500 flex items-center justify-end pr-2 transition-[width] duration-500 ease-out"
+              class="h-full bg-primary-500 flex items-center justify-end pr-2 transition-[width] duration-500 ease-out rounded-r-lg"
               [style.width.%]="donationPercent()"
-            >
-            </div>
-            <span class="text-[32px] text-white whitespace-nowrap pl-2 absolute left-1/2 -translate-x-1/2">
-            {{ donationAmount() | number: "1.0-2" }}&nbsp;<span class="text-[28px]">€</span>
-          </span>
+            ></div>
           </div>
-        </div>
+        </app-card>
 
-        <div class="text-[28px]">OU</div>
+        <div class="text-[40px] my-auto">OU</div>
 
-        <div class="flex gap-1 items-center">
-          <div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="var(--icon-size)"
-              width="var(--icon-size)"
-              viewBox="0 -960 960 960"
-              fill="var(--color-zevent-500)">
-              <path d="M360-840v-80h240v80H360Zm80 440h80v-240h-80v240Zm-99.5 291.5Q275-137 226-186t-77.5-114.5Q120-366 120-440t28.5-139.5Q177-645 226-694t114.5-77.5Q406-800 480-800q62 0 119 20t107 58l56-56 56 56-56 56q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80q-74 0-139.5-28.5ZM678-242q82-82 82-198t-82-198q-82-82-198-82t-198 82q-82 82-82 198t82 198q82 82 198 82t198-82ZM480-440Z" />
-            </svg>
-          </div>
-          <span class="text-[32px]">{{ remainingLabel() }}</span>
-        </div>
-      </div>
-    </app-card>
+        <app-card color="light-gray" class="flex flex-row items-center [--card-padding:12px] gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 42.26 42.26" class="size-5">
+            <path
+              fill="white"
+              d="M28.74,3.54v2.72h5.5v1.75h1.75v5.5h2.72v15.22h-2.72v5.5h-1.75v1.75h-5.5v2.72h-15.22v-2.72h-5.5v-1.75h-1.75v-5.5h-2.72v-15.22h2.72v-5.5h1.75v-1.75h5.5v-2.72h15.22M32.28,0H9.98v2.72h-5.5v1.75h-1.75v5.5H0v22.3h2.72v5.5h1.75v1.75h5.5v2.72h22.3v-2.72h5.5v-1.75h1.75v-5.5h2.72V9.98h-2.72v-5.5h-1.75v-1.75h-5.5V0h0Z" />
+            <rect
+              fill="white"
+              x="13.63"
+              y="13.7"
+              width="14.91"
+              height="3.48"
+              transform="translate(36.53 -5.64) rotate(90)" />
+            <rect fill="white" x="19.35" y="19.42" width="11.28" height="3.48" />
+          </svg>
+          <span class="text-[60px]/[60px] font-thin">{{ remainingLabel() }}</span>
+        </app-card>
+
+      </app-card>
+    </div>
   `,
 })
 export class ModeTimerComponent {
@@ -78,7 +73,7 @@ export class ModeTimerComponent {
   private readonly now = signal(this.modeTimerSocket.serverNow());
 
   protected readonly mode = computed(() => this.modeTimerSocket.modeTimerInfo()?.mode ?? ActionMode.Democracy);
-  protected readonly modeLabel = computed(() => (this.mode() === ActionMode.Democracy ? 'Démocratie' : 'Anarchie').toLocaleUpperCase());
+  protected readonly modeLabel = computed(() => (this.mode() === ActionMode.Democracy ? 'Démocratie' : 'Anarchie'));
 
   protected readonly phaseEndTimestamp = computed(() => this.modeTimerSocket.modeTimerInfo()?.phaseEndTimestamp ?? null);
   protected readonly phaseDurationMs = computed(() => this.modeTimerSocket.modeTimerInfo()?.phaseDurationMs ?? 0);

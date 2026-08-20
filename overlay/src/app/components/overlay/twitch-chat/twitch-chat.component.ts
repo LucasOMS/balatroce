@@ -24,7 +24,7 @@ interface DisplayedChatMessage {
   host: {class: "flex flex-col min-h-0"},
   imports: [CardComponent],
   template: `
-    <app-card class="flex-1 min-h-0 flex flex-col overflow-hidden">
+    <app-card title="Tchat" class="flex-1 min-h-0 flex flex-col overflow-hidden">
       <div #scrollContainer class="flex-1 flex-col-reverse min-h-0 overflow-y-clip flex flex-col gap-1 -mt-2">
         @for (item of displayedMessages(); track item.id) {
           <div class="text-[20px] leading-tight break-words" [class.chat-message-enter]="item.animate">

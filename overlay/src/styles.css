@@ -5,7 +5,18 @@
 @theme static {
   --joker-card-height: 150px;
   --side-overlay-width: 425px;
-  --bg-card: hsl(116 10% 7% / 1);
+
+  --color-card-dark-bg: #162423;
+  --color-card-dark-shadow: #040e0f;
+
+  --color-card-light-gray-bg: #2d3b3b;
+  --color-card-light-gray-shadow: #040e0f;
+
+  --color-card-green-bg: #2fb734;
+  --color-card-green-shadow: #127712;
+
+  --color-card-red-bg: #fe4c40;
+  --color-card-red-shadow: #a72d23;
 }
 
 @theme {
@@ -18,20 +29,11 @@
   --color-money: #f5b244;
 
   /* Couleur "primaire" utilisée pour attirer l'oeil (ex: flash d'apparition du dernier vote gagnant) */
-  --color-primary-500: #38932C;
+  --color-primary-500: #2fb734;
+  --color-primary-900: #0f300c;
 
-  --color-zevent-50: #E7F8E6;
-  --color-zevent-100: #CFEFCB;
-  --color-zevent-200: #A7DE9C;
-  --color-zevent-300: #7DCC6D;
-  --color-zevent-400: #58B646;
-  --color-zevent-500: #38932C;
-  --color-zevent-600: #28731D;
-  --color-zevent-700: #1C5615;
-  --color-zevent-800: #123A0E;
-  --color-zevent-900: #092307;
-  --color-zevent-950: #041403;
-  --color-zevent-975: #020A02;
+
+  --color-main-overlay-bg: #2d3b3b;
 }
 
 
@@ -47,7 +49,7 @@ body {
 }
 
 @utility action-keyword-letter {
-  @apply text-zevent-400 inline uppercase;
+  @apply text-primary-500 inline uppercase;
 }
 
 @property --text-outline-color {
@@ -66,6 +68,13 @@ body {
 
 @utility bg-zevent {
   background-image: url("/bg-zevent.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+
+@utility bg-balatro {
+  background-image: url("/bg-balatro.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center center;
