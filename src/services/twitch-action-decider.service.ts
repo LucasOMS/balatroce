@@ -10,6 +10,7 @@ import { AnarchyStrategy } from "./twitch/anarchy-strategy";
 import { VoteTimerState } from "../../shared/timer-state";
 import { TwitchVoteInfo } from "../../shared/twitch-vote-info";
 import { ActionMode } from "../../shared/action-mode";
+import { PerformedAction } from "../../shared/performed-action";
 import { ModeManagerService } from "./mode-manager.service";
 
 /**
@@ -39,8 +40,7 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
   private looping = false;
   /** `true` si le timer a été mis en pause (ex: relance du jeu en cours) */
   private paused = false;
-  /** Libellé de la commande gagnante du dernier vote clos, affiché sur l'overlay pendant la transition */
-  private lastWinningLabel: string | null = null;
+  private lastPerformedAction: PerformedAction | null = null;
 
   private readonly actionsResultSubject = new Subject<ChatAction[]>();
   /** Émet la liste des actions à effectuer (par ordre de préférence) à la fin de chaque vote */
@@ -129,6 +129,11 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     return this.endTimestamp;
   }
 
+  public setLastPerformedAction(action: PerformedAction | null): void {
+    this.lastPerformedAction = action;
+    this.stateChangeSubject.next();
+  }
+
   /** Construit les informations de vote à envoyer au front (indépendamment du reste de l'overlay) */
   public getCurrentVoteInfo(): TwitchVoteInfo {
     const entries = this.computeVoteEntries();
@@ -138,17 +143,14 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
       voteCounts: [...entries]
         .sort((a, b) => b.count - a.count)
         .map((entry) => ({ label: entry.label, count: entry.count })),
-      lastWinningLabel: this.lastWinningLabel,
+      lastPerformedAction: this.lastPerformedAction,
     };
   }
 
   private runVotePhase(): void {
     this.state = VoteTimerState.RUNNING;
     this.endTimestamp = Date.now() + TwitchActionDeciderService.VOTE_DURATION_MS;
-    // On ne veut afficher la dernière commande gagnante que pendant la
-    // transition qui suit immédiatement son vote (état DELAY) : elle est
-    // donc effacée dès qu'une nouvelle phase de vote démarre.
-    this.lastWinningLabel = null;
+    this.lastPerformedAction = null;
     // Seule la phase RUNNING doit comptabiliser les messages du chat comme
     // des votes : on autorise leur enregistrement maintenant, et on le
     // désactivera dès la fin de cette phase (voir onVoteEnd).
@@ -166,9 +168,6 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     const entries = this.computeVoteEntries();
     const orderedEntries = this.getStrategy().decide(entries);
     this.logger.log(`Fin du vote : ${orderedEntries.length.toString()} action(s) ordonnée(s)`);
-    if (orderedEntries.length > 0) {
-      this.lastWinningLabel = orderedEntries[0].label;
-    }
     this.actionsResultSubject.next(orderedEntries.map((entry) => entry.action));
     this.collector.clear();
 
@@ -210,9 +209,3 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     return [...grouped.values()];
   }
 }
-
-
-
-
-
-
