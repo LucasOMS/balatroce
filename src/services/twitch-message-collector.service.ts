@@ -119,10 +119,27 @@ export class TwitchMessageCollectorService implements OnModuleInit, OnModuleDest
     }
 
     /**
+     * Autorise ou non la prise en compte des messages. Contrôlé par
+     * {@link TwitchActionDeciderService} en fonction de l'état de son timer :
+     * seul l'état RUNNING (vote en cours) doit autoriser les votes.
+     */
+    public setAcceptingVotes(accepting: boolean): void {
+        this.acceptingVotes = accepting;
+    }
+
+    /**
      * Enregistre le message d'un utilisateur s'il commence par un ActionKeyword.
      * Utilisé aussi bien par la connexion Twitch réelle que par le mock de test.
+     *
+     * Ignoré en dehors de la phase de vote active (voir {@link setAcceptingVotes}) :
+     * les messages reçus pendant la pause entre deux votes ne doivent jamais
+     * être comptabilisés, ni faire varier l'affichage de l'overlay.
      */
     public registerMessage(username: string, rawMessage: string): void {
+        if (!this.acceptingVotes) {
+            return;
+        }
+
         const message = rawMessage.toLowerCase().trim();
 
         if (!isActionMessage(message)) {

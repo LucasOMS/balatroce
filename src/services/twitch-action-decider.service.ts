@@ -86,6 +86,7 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     }
     this.state = VoteTimerState.STOPPED;
     this.endTimestamp = null;
+    this.collector.setAcceptingVotes(false);
     this.stateChangeSubject.next();
   }
 
@@ -105,6 +106,7 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     }
     this.state = VoteTimerState.STOPPED;
     this.endTimestamp = null;
+    this.collector.setAcceptingVotes(false);
     this.stateChangeSubject.next();
   }
 
@@ -147,11 +149,20 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     // transition qui suit immédiatement son vote (état DELAY) : elle est
     // donc effacée dès qu'une nouvelle phase de vote démarre.
     this.lastWinningLabel = null;
+    // Seule la phase RUNNING doit comptabiliser les messages du chat comme
+    // des votes : on autorise leur enregistrement maintenant, et on le
+    // désactivera dès la fin de cette phase (voir onVoteEnd).
+    this.collector.setAcceptingVotes(true);
     this.stateChangeSubject.next();
     this.timer = setTimeout(() => this.onVoteEnd(), TwitchActionDeciderService.VOTE_DURATION_MS);
   }
 
   private onVoteEnd(): void {
+    // On coupe immédiatement la prise en compte de nouveaux messages : la
+    // phase DELAY qui suit ne sert qu'à afficher le résultat du vote clos,
+    // pas à commencer à compter les votes du prochain tour.
+    this.collector.setAcceptingVotes(false);
+
     const entries = this.computeVoteEntries();
     const orderedEntries = this.getStrategy().decide(entries);
     this.logger.log(`Fin du vote : ${orderedEntries.length.toString()} action(s) ordonnée(s)`);
