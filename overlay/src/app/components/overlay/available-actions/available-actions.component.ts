@@ -85,7 +85,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
     },
   [ActionKeyword.Reroll]:
     {
-      description: '<span class="action-keyword-letter">R</span>elancer le <span class="action-keyword-letter">M</span>agasin',
+      description: '<span class="action-keyword-letter">R</span>elancer le magasin',
       example: `${ActionKeyword.Reroll}`
     },
   [ActionKeyword.StartRun]:

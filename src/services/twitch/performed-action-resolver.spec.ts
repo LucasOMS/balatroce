@@ -47,6 +47,20 @@ describe("performed action resolver", () => {
       ],
     });
   });
+
+  it("snapshots the purchased item label from the previous shop", () => {
+    const previousState = gameState({shop: [card("Joker", "", "")]});
+
+    const result = resolvePerformedAction(
+      {method: BotMethod.BUY, params: {card: 0}},
+      previousState,
+    );
+
+    expect(result).toEqual({
+      type: PerformedActionType.BUY_CARD,
+      item: {label: "Joker"},
+    });
+  });
 });
 
 function playingCard(rank: string, suit: string): PlayingCardSnapshot {
@@ -60,8 +74,14 @@ function card(label: string, rank: string, suit: string): Card {
   } as Card;
 }
 
-function gameState(overrides: {hand?: Card[]}): GameState {
+function gameState(overrides: {hand?: Card[]; shop?: Card[]}): GameState {
   return {
     hand: {cards: overrides.hand ?? []},
+    shop: {cards: overrides.shop ?? []},
+    jokers: {cards: []},
+    consumables: {cards: []},
+    vouchers: {cards: []},
+    packs: {cards: []},
+    pack: null,
   } as unknown as GameState;
 }

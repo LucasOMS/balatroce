@@ -1,4 +1,5 @@
 import {
+  GameItemSnapshot,
   PerformedAction,
   PerformedActionType,
   PlayingCardSnapshot,
@@ -93,16 +94,67 @@ export function resolvePerformedAction(
         cards: snapshotPlayingCards(previousState.hand.cards, action.params.cards),
       };
     case BotMethod.REARRANGE:
-      return "hand" in action.params
-        ? {
-            type: PerformedActionType.REARRANGE_HAND,
-            cards: snapshotPlayingCards(previousState.hand.cards, action.params.hand),
-          }
-        : null;
+      if ("hand" in action.params) {
+        return {
+          type: PerformedActionType.REARRANGE_HAND,
+          cards: snapshotPlayingCards(previousState.hand.cards, action.params.hand),
+        };
+      }
+      if ("jokers" in action.params) {
+        return {
+          type: PerformedActionType.REARRANGE_JOKERS,
+          items: snapshotItems(previousState.jokers.cards, action.params.jokers),
+        };
+      }
+      return {
+        type: PerformedActionType.REARRANGE_CONSUMABLES,
+        items: snapshotItems(previousState.consumables.cards, action.params.consumables),
+      };
+    case BotMethod.SELL:
+      if ("joker" in action.params) {
+        const item = snapshotItem(previousState.jokers.cards[action.params.joker]);
+        return item ? {type: PerformedActionType.SELL_JOKER, item} : null;
+      }
+      const consumable = snapshotItem(previousState.consumables.cards[action.params.consumable]);
+      return consumable ? {type: PerformedActionType.SELL_CONSUMABLE, item: consumable} : null;
+    case BotMethod.USE: {
+      const item = snapshotItem(previousState.consumables.cards[action.params.consumable]);
+      if (!item) {
+        return null;
+      }
+      return {
+        type: PerformedActionType.USE_CONSUMABLE,
+        item,
+        cards: snapshotPlayingCards(previousState.hand.cards, action.params.cards ?? []),
+      };
+    }
+    case BotMethod.BUY:
+      if ("card" in action.params) {
+        const item = snapshotItem(previousState.shop.cards[action.params.card]);
+        return item ? {type: PerformedActionType.BUY_CARD, item} : null;
+      }
+      if ("voucher" in action.params) {
+        const item = snapshotItem(previousState.vouchers.cards[action.params.voucher]);
+        return item ? {type: PerformedActionType.BUY_VOUCHER, item} : null;
+      }
+      const pack = snapshotItem(previousState.packs.cards[action.params.pack]);
+      return pack ? {type: PerformedActionType.BUY_PACK, item: pack} : null;
     case BotMethod.PACK:
-      return "skip" in action.params
-        ? {type: PerformedActionType.PACK_SKIP}
-        : null;
+      if ("skip" in action.params) {
+        return {type: PerformedActionType.PACK_SKIP};
+      }
+      if (!previousState.pack) {
+        return null;
+      }
+      const item = snapshotItem(previousState.pack.cards[action.params.card]);
+      if (!item) {
+        return null;
+      }
+      return {
+        type: PerformedActionType.PACK_SELECT,
+        item,
+        cards: snapshotPlayingCards(previousState.hand.cards, action.params.targets ?? []),
+      };
     default:
       return null;
   }
@@ -115,12 +167,23 @@ function snapshotPlayingCards(cards: Card[], indexes: number[]): PlayingCardSnap
   });
 }
 
+function snapshotItems(cards: Card[], indexes: number[]): GameItemSnapshot[] {
+  return indexes.flatMap((index) => {
+    const item = snapshotItem(cards[index]);
+    return item ? [item] : [];
+  });
+}
+
 function snapshotPlayingCard(card: Card): PlayingCardSnapshot {
   return {
     rank: card.value.rank ?? "",
     suit: card.value.suit ?? "",
     label: card.label,
   };
+}
+
+function snapshotItem(card: Card | undefined): GameItemSnapshot | null {
+  return card ? {label: card.label} : null;
 }
 
 function rankValue(rank: string): number {

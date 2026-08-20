@@ -20,7 +20,7 @@ import {formatPerformedAction} from '../../../utils/performed-action-display';
           @for (part of lastPerformedActionParts(); track $index) {
             @if (part.kind === 'playing-card') {
               <span
-                class="inline-flex items-center rounded bg-white px-1 font-bold"
+                class="inline-flex items-center rounded bg-white px-0.5 font-bold"
                 [class.text-red-600]="part.color === 'red'"
                 [class.text-black]="part.color === 'black'">
                 {{ part.rank }}{{ part.suit }}
