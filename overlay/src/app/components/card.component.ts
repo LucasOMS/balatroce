@@ -118,119 +118,114 @@ export type CardColor = 'dark' | 'red' | 'green' | 'light-gray';
       initial-value: 16px;
     }
 
-    app-card {
-      position: relative;
-      z-index: 1;
-      padding: var(--card-padding) var(--card-padding) calc(var(--card-padding) + 4px) var(--card-padding);
+    @layer components {
+      app-card {
+        position: relative;
+        z-index: 1;
+        padding: var(--card-padding) var(--card-padding) calc(var(--card-padding) + 4px) var(--card-padding);
+
+        &.red {
+          --card-bg: var(--color-card-red-bg);
+          --card-shadow: var(--color-card-red-shadow);
+        }
+
+        &.green {
+          --card-bg: var(--color-card-green-bg);
+          --card-shadow: var(--color-card-green-shadow);
+        }
+
+        &.dark {
+          --card-bg: var(--color-card-dark-bg);
+          --card-shadow: var(--color-card-dark-shadow);
+        }
+
+        &.light-gray {
+          --card-bg: var(--color-card-light-gray-bg);
+          --card-shadow: var(--color-card-light-gray-shadow);
+        }
+
+        .card-background {
+          --border-radius: 16px;
+          z-index: -1;
 
 
-      /* Quick fix because .absolute cannot override position relative */
+          position: absolute;
+          inset: 0;
 
-      &.absolute {
-        position: absolute;
-      }
+          .bottom-edge {
+            position: absolute;
+            bottom: 0;
+            left: calc(var(--border-radius) - 1px);
+            right: calc(var(--border-radius) - 1px);
+            height: var(--border-radius);
+            width: calc(100% - var(--border-radius) * 2 + 2px);
+          }
 
-      &.red {
-        --card-bg: var(--color-card-red-bg);
-        --card-shadow: var(--color-card-red-shadow);
-      }
+          .bottom-left {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: var(--border-radius);
+            height: var(--border-radius);
+          }
 
-      &.green {
-        --card-bg: var(--color-card-green-bg);
-        --card-shadow: var(--color-card-green-shadow);
-      }
+          .bottom-right {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: var(--border-radius);
+            height: var(--border-radius);
+          }
 
-      &.dark {
-        --card-bg: var(--color-card-dark-bg);
-        --card-shadow: var(--color-card-dark-shadow);
-      }
+          .top-edge {
+            position: absolute;
+            top: 0;
+            left: calc(var(--border-radius) - 1px);
+            right: calc(var(--border-radius) - 1px);
+            height: var(--border-radius);
+            width: calc(100% - var(--border-radius) * 2 + 2px);
+          }
 
-      &.light-gray {
-        --card-bg: var(--color-card-light-gray-bg);
-        --card-shadow: var(--color-card-light-gray-shadow);
-      }
-    }
+          .left-edge {
+            position: absolute;
+            top: calc(var(--border-radius) - 1px);
+            bottom: calc(var(--border-radius) - 1px);
+            left: 0;
+            width: var(--border-radius);
+            height: calc(100% - var(--border-radius) * 2 + 2px);
+          }
 
-    .card-background {
-      --border-radius: 16px;
-      z-index: -1;
+          .right-edge {
+            position: absolute;
+            top: calc(var(--border-radius) - 1px);
+            bottom: calc(var(--border-radius) - 1px);
+            right: 0;
+            width: var(--border-radius);
+            height: calc(100% - var(--border-radius) * 2 + 2px);
+          }
 
+          .top-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--border-radius);
+            height: var(--border-radius);
+          }
 
-      position: absolute;
-      inset: 0;
+          .top-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: var(--border-radius);
+            height: var(--border-radius);
+          }
 
-      .bottom-edge {
-        position: absolute;
-        bottom: 0;
-        left: calc(var(--border-radius) - 1px);
-        right: calc(var(--border-radius) - 1px);
-        height: var(--border-radius);
-        width: calc(100% - var(--border-radius) * 2 + 2px);
-      }
-
-      .bottom-left {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: var(--border-radius);
-        height: var(--border-radius);
-      }
-
-      .bottom-right {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: var(--border-radius);
-        height: var(--border-radius);
-      }
-
-      .top-edge {
-        position: absolute;
-        top: 0;
-        left: calc(var(--border-radius) - 1px);
-        right: calc(var(--border-radius) - 1px);
-        height: var(--border-radius);
-        width: calc(100% - var(--border-radius) * 2 + 2px);
-      }
-
-      .left-edge {
-        position: absolute;
-        top: calc(var(--border-radius) - 1px);
-        bottom: calc(var(--border-radius) - 1px);
-        left: 0;
-        width: var(--border-radius);
-        height: calc(100% - var(--border-radius) * 2 + 2px);
-      }
-
-      .right-edge {
-        position: absolute;
-        top: calc(var(--border-radius) - 1px);
-        bottom: calc(var(--border-radius) - 1px);
-        right: 0;
-        width: var(--border-radius);
-        height: calc(100% - var(--border-radius) * 2 + 2px);
-      }
-
-      .top-left {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: var(--border-radius);
-        height: var(--border-radius);
-      }
-
-      .top-right {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: var(--border-radius);
-        height: var(--border-radius);
-      }
-
-      .center {
-        position: absolute;
-        inset: calc(var(--border-radius) - 1px);
-        background: var(--card-bg);
+          .center {
+            position: absolute;
+            inset: calc(var(--border-radius) - 1px);
+            background: var(--card-bg);
+          }
+        }
       }
     }
   `,
