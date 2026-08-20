@@ -2,18 +2,15 @@ import { ChatAction } from "../../interfaces/chat-action";
 import { BotMethod } from "../../interfaces/bot-request";
 
 /**
- * Méthodes pour lesquelles l'ordre des index de cartes n'a pas d'importance
- * (jouer/défausser un set de cartes est équivalent quel que soit l'ordre).
- * Pour REARRANGE, l'ordre est justement le sens de l'action : on ne le trie pas.
+ * Methods for which card index order does not affect the action semantics.
+ * PLAY intentionally keeps its order because played cards score from left to right.
  */
 const ORDER_INDEPENDENT_METHODS = new Set<BotMethod>([
-  BotMethod.PLAY,
   BotMethod.DISCARD,
 ]);
 
 /**
- * Construit une clé canonique pour une action, permettant de regrouper
- * des messages équivalents (ex: "jouer 2 1 3" === "jouer 1 2 3").
+ * Builds a canonical key used to group equivalent chat actions.
  */
 export function canonicalizeAction(action: ChatAction): {
   key: string;
@@ -34,4 +31,3 @@ export function canonicalizeAction(action: ChatAction): {
 
   return { key, canonicalAction };
 }
-

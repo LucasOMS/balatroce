@@ -174,7 +174,18 @@ export class BotService {
     }
 
     async useRaw(msg: ChatAction): Promise<any> {
-        return await this.httpService.sendRequest(msg);
+        if (msg.method !== BotMethod.PLAY || areIndexesIncreasing(msg.params.cards)) {
+            return await this.httpService.sendRequest(msg);
+        }
+
+        const state = await this.getCurrentState();
+        const {handOrder, playIndexes} = buildOrderedPlayPlan(
+            msg.params.cards,
+            state.hand.count,
+        );
+
+        await this.rearrangeHand(handOrder);
+        return await this.play(playIndexes);
     }
 
     /** Envoie n'importe quelle requête brute (debug uniquement). */
@@ -226,4 +237,22 @@ export class BotService {
     public awaitInit(): Promise<void> {
         return this.httpService.awaitInit();
     }
+}
+
+function areIndexesIncreasing(indexes: number[]): boolean {
+    return indexes.every((index, position) => position === 0 || indexes[position - 1] < index);
+}
+
+function buildOrderedPlayPlan(
+    requestedIndexes: number[],
+    handSize: number,
+): {handOrder: number[]; playIndexes: number[]} {
+    const playIndexes = [...requestedIndexes].sort((a, b) => a - b);
+    const handOrder = Array.from({length: handSize}, (_, index) => index);
+
+    playIndexes.forEach((position, index) => {
+        handOrder[position] = requestedIndexes[index];
+    });
+
+    return {handOrder, playIndexes};
 }
