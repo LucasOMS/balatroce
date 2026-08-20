@@ -44,9 +44,9 @@ export function formatPerformedAction(action: PerformedAction): PerformedActionD
     case PerformedActionType.USE_CONSUMABLE:
       return action.cards.length > 0
         ? [
-          {kind: "text", text: `Utiliser ${action.item.label} sur `},
-          ...playingCards(action.cards),
-        ]
+            {kind: "text", text: `Utiliser ${action.item.label} sur `},
+            ...playingCards(action.cards),
+          ]
         : text(`Utiliser ${action.item.label}`);
     case PerformedActionType.REARRANGE_JOKERS:
       return text(`Réorganiser les jokers : ${action.items.map((item) => item.label).join(", ")}`);
@@ -61,9 +61,9 @@ export function formatPerformedAction(action: PerformedAction): PerformedActionD
     case PerformedActionType.PACK_SELECT:
       return action.cards.length > 0
         ? [
-          {kind: "text", text: `Choisir ${action.item.label} sur `},
-          ...playingCards(action.cards),
-        ]
+            {kind: "text", text: `Choisir ${action.item.label} sur `},
+            ...playingCards(action.cards),
+          ]
         : text(`Choisir ${action.item.label}`);
   }
 }
