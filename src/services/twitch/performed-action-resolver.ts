@@ -1,15 +1,75 @@
-import {PerformedAction, PerformedActionType} from "../../../shared/performed-action";
+import {
+  PerformedAction,
+  PerformedActionType,
+  PlayingCardSnapshot,
+} from "../../../shared/performed-action";
 import {ChatAction} from "../../interfaces/chat-action";
 import {BotMethod} from "../../interfaces/bot-request";
-import {GameState} from "../../interfaces/game-state";
+import {Card, GameState} from "../../interfaces/game-state";
+
+const RANK_VALUES: Record<string, number> = {
+  "2": 2,
+  "3": 3,
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  "7": 7,
+  "8": 8,
+  "9": 9,
+  T: 10,
+  "10": 10,
+  J: 11,
+  Q: 12,
+  K: 13,
+  A: 14,
+};
 
 /**
- * Builds the semantic description of an action from the game state that existed
- * immediately before the action was executed.
+ * Orders cards for the Play action so the poker combination reads naturally:
+ * grouped ranks first (trips before pairs, pairs before kickers), then high
+ * cards. A wheel straight is displayed 5-4-3-2-A.
+ */
+export function orderPlayedCards(cards: PlayingCardSnapshot[]): PlayingCardSnapshot[] {
+  const indexedCards = cards.map((card, index) => ({card, index}));
+  const rankCounts = new Map<string, number>();
+
+  for (const {card} of indexedCards) {
+    rankCounts.set(card.rank, (rankCounts.get(card.rank) ?? 0) + 1);
+  }
+
+  const hasGroupedRanks = [...rankCounts.values()].some((count) => count > 1);
+  const rankValues = cards.map((card) => rankValue(card.rank));
+  const isWheel =
+    cards.length === 5 &&
+    new Set(rankValues).size === 5 &&
+    [2, 3, 4, 5, 14].every((rank) => rankValues.includes(rank));
+
+  return indexedCards
+    .sort((left, right) => {
+      if (hasGroupedRanks) {
+        const countDifference =
+          (rankCounts.get(right.card.rank) ?? 0) -
+          (rankCounts.get(left.card.rank) ?? 0);
+        if (countDifference !== 0) {
+          return countDifference;
+        }
+      }
+
+      const leftRank = isWheel && rankValue(left.card.rank) === 14 ? 1 : rankValue(left.card.rank);
+      const rightRank = isWheel && rankValue(right.card.rank) === 14 ? 1 : rankValue(right.card.rank);
+      const rankDifference = rightRank - leftRank;
+      return rankDifference !== 0 ? rankDifference : left.index - right.index;
+    })
+    .map(({card}) => card);
+}
+
+/**
+ * Builds a semantic description from the exact game state used to validate the
+ * action. Index-based commands are therefore resolved before the game mutates.
  */
 export function resolvePerformedAction(
   action: ChatAction,
-  _previousState: GameState,
+  previousState: GameState,
 ): PerformedAction | null {
   switch (action.method) {
     case BotMethod.SELECT:
@@ -22,6 +82,23 @@ export function resolvePerformedAction(
       return {type: PerformedActionType.NEXT_ROUND};
     case BotMethod.START:
       return {type: PerformedActionType.START_RUN};
+    case BotMethod.PLAY:
+      return {
+        type: PerformedActionType.PLAY,
+        cards: orderPlayedCards(snapshotPlayingCards(previousState.hand.cards, action.params.cards)),
+      };
+    case BotMethod.DISCARD:
+      return {
+        type: PerformedActionType.DISCARD,
+        cards: snapshotPlayingCards(previousState.hand.cards, action.params.cards),
+      };
+    case BotMethod.REARRANGE:
+      return "hand" in action.params
+        ? {
+            type: PerformedActionType.REARRANGE_HAND,
+            cards: snapshotPlayingCards(previousState.hand.cards, action.params.hand),
+          }
+        : null;
     case BotMethod.PACK:
       return "skip" in action.params
         ? {type: PerformedActionType.PACK_SKIP}
@@ -29,4 +106,23 @@ export function resolvePerformedAction(
     default:
       return null;
   }
+}
+
+function snapshotPlayingCards(cards: Card[], indexes: number[]): PlayingCardSnapshot[] {
+  return indexes.flatMap((index) => {
+    const card = cards[index];
+    return card ? [snapshotPlayingCard(card)] : [];
+  });
+}
+
+function snapshotPlayingCard(card: Card): PlayingCardSnapshot {
+  return {
+    rank: card.value.rank ?? "",
+    suit: card.value.suit ?? "",
+    label: card.label,
+  };
+}
+
+function rankValue(rank: string): number {
+  return RANK_VALUES[rank.toUpperCase()] ?? 0;
 }

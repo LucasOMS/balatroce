@@ -1,4 +1,8 @@
-import {PerformedAction, PerformedActionType} from "@shared/performed-action";
+import {
+  PerformedAction,
+  PerformedActionType,
+  PlayingCardSnapshot,
+} from "@shared/performed-action";
 
 export type PlayingCardColor = "red" | "black";
 
@@ -10,6 +14,13 @@ export type PerformedActionDisplayPart =
       suit: string;
       color: PlayingCardColor;
     };
+
+const SUITS: Record<string, {symbol: string; color: PlayingCardColor}> = {
+  H: {symbol: "♥️", color: "red"},
+  D: {symbol: "♦️", color: "red"},
+  C: {symbol: "♣️", color: "black"},
+  S: {symbol: "♠️", color: "black"},
+};
 
 export function formatPerformedAction(action: PerformedAction): PerformedActionDisplayPart[] {
   switch (action.type) {
@@ -25,9 +36,40 @@ export function formatPerformedAction(action: PerformedAction): PerformedActionD
       return text("Commencer une partie");
     case PerformedActionType.PACK_SKIP:
       return text("Passer le pack");
+    case PerformedActionType.PLAY:
+      return withPlayingCards("Jouer ", action.cards);
+    case PerformedActionType.DISCARD:
+      return withPlayingCards("Défausser ", action.cards);
+    case PerformedActionType.REARRANGE_HAND:
+      return withPlayingCards("Réorganiser la main : ", action.cards);
   }
 }
 
 function text(value: string): PerformedActionDisplayPart[] {
   return [{kind: "text", text: value}];
+}
+
+function withPlayingCards(prefix: string, cards: PlayingCardSnapshot[]): PerformedActionDisplayPart[] {
+  return [{kind: "text", text: prefix}, ...playingCards(cards)];
+}
+
+function playingCards(cards: PlayingCardSnapshot[]): PerformedActionDisplayPart[] {
+  return cards.flatMap((card, index) => {
+    const suit = SUITS[card.suit.toUpperCase()];
+    const separator: PerformedActionDisplayPart[] = index === 0 ? [] : [{kind: "text", text: " "}];
+
+    if (!suit || !card.rank) {
+      return [...separator, {kind: "text", text: card.label} as PerformedActionDisplayPart];
+    }
+
+    return [
+      ...separator,
+      {
+        kind: "playing-card",
+        rank: card.rank.toUpperCase() === "T" ? "10" : card.rank.toUpperCase(),
+        suit: suit.symbol,
+        color: suit.color,
+      } as PerformedActionDisplayPart,
+    ];
+  });
 }
