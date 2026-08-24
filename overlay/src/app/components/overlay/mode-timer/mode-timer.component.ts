@@ -33,8 +33,13 @@ function formatDuration(ms: number): string {
         <app-card color="green" subtitle="Changement de mode dans" class="flex-1 [--card-padding:12px]">
 
           <div class="relative bg-primary-900 border-2 border-white rounded-lg flex-1 h-4 overflow-hidden">
-            <span class="text-[32px]/[32px] text-white whitespace-nowrap absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              {{ donationAmount() | number: "1.0-2" }}&nbsp;<span class="text-[28px]">€</span>
+            <span class="flex items-baseline gap-[0.5ch] text-[32px]/[32px] text-white whitespace-nowrap absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <span>{{ donationAmount() | number: "1.0-2" }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 42.3 42.3" class="size-2.5">
+                <polygon
+                  fill="white"
+                  points="17.7 42.2 17.7 40.2 13.5 40.2 13.5 38.1 11.4 38.1 11.4 36 9.4 36 9.4 28.8 3.1 28.8 3.1 24.2 7.3 24.2 7.3 21.3 3.1 21.3 3.1 16.9 7.3 16.9 7.3 12.5 9.4 12.5 9.4 6.2 11.4 6.2 11.4 4.2 13.5 4.2 13.5 2.1 17.7 2.1 17.7 0 30.8 0 30.8 2.1 35 2.1 35 4.2 37.1 4.2 37.1 6.2 39.1 6.2 39.1 15.2 32.2 15.2 32.2 11.1 30.2 11.1 30.2 9 28.1 9 28.1 6.9 20.4 6.9 20.4 9 18.3 9 18.3 11.1 16.3 11.1 16.3 16.9 30.8 16.9 30.8 19.2 28.7 19.2 28.7 21.3 14.2 21.3 14.2 24.2 28.7 24.2 28.7 26.8 26.7 26.8 26.7 28.8 16.3 28.8 16.3 31.2 18.3 31.2 18.3 33.3 20.4 33.3 20.4 35.4 28.1 35.4 28.1 33.3 30.2 33.3 30.2 31.2 32.2 31.2 32.2 27 39.1 27 39.1 36 37.1 36 37.1 38.1 35 38.1 35 40.2 30.8 40.2 30.8 42.2 17.7 42.2" />
+              </svg>
             </span>
             <div
               class="h-full bg-primary-500 flex items-center justify-end pr-2 transition-[width] duration-500 ease-out rounded-r-lg"

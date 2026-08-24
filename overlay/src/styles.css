@@ -6,11 +6,13 @@
   --joker-card-height: 150px;
   --side-overlay-width: 425px;
 
+  --color-shadow: #040e0f;
+
   --color-card-dark-bg: #162423;
-  --color-card-dark-shadow: #040e0f;
+  --color-card-dark-shadow: var(--color-shadow);
 
   --color-card-light-gray-bg: #2d3b3b;
-  --color-card-light-gray-shadow: #040e0f;
+  --color-card-light-gray-shadow: var(--color-shadow);
 
   --color-card-green-bg: #2fb734;
   --color-card-green-shadow: #127712;
@@ -31,7 +33,6 @@
   /* Couleur "primaire" utilisée pour attirer l'oeil (ex: flash d'apparition du dernier vote gagnant) */
   --color-primary-500: #2fb734;
   --color-primary-900: #0f300c;
-
 
   --color-main-overlay-bg: #2d3b3b;
 }

@@ -8,7 +8,19 @@ import {formatPerformedAction} from '../../../utils/performed-action-display';
   host: {class: "block"},
   template: `
     <app-card class="h-[80px] [--card-padding:8px] px-2! gap-0!">
-      <div class="text-[20px]/[20px] mb-1">{{ title() }}</div>
+      <div class="flex gap-[1ch] items-end mb-1">
+        <div class="text-[20px]/[20px]">{{ title() }}</div>
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 40 40" class="size-2">
+          <rect fill="var(--color-shadow)" x="1.3" y="19.3" width="6.7" height="15.5" />
+          <rect fill="var(--color-shadow)" x="11.5" y="8.3" width="6.7" height="26.5" />
+          <rect fill="var(--color-shadow)" x="21.8" y="13.1" width="6.7" height="21.8" />
+          <rect fill="var(--color-shadow)" x="32" y="24.7" width="6.7" height="10.1" />
+          <rect fill="var(--color-primary-500)" x="1.3" y="15.9" width="6.7" height="15.1" />
+          <rect fill="var(--color-primary-500)" x="11.5" y="5.2" width="6.7" height="25.9" />
+          <rect fill="var(--color-primary-500)" x="21.8" y="9.8" width="6.7" height="21.3" />
+          <rect fill="var(--color-primary-500)" x="32" y="21.2" width="6.7" height="9.9" />
+        </svg>
+      </div>
       <hr class="border-b-1 border-(--card-shadow) mb-0.5" />
 
       @if (totalVoteCount() > 0) {

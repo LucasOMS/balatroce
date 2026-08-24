@@ -2,6 +2,8 @@ import {Component, input, ViewEncapsulation} from "@angular/core";
 
 export type CardColor = 'dark' | 'red' | 'green' | 'light-gray';
 
+type IconName = 'chat' | 'action';
+
 @Component({
   selector: "app-card",
   host: {
@@ -14,7 +16,32 @@ export type CardColor = 'dark' | 'red' | 'green' | 'light-gray';
   template: `
     @if (title()) {
       <div>
-        <div class="text-[30px] m-0.5">{{ title() }}</div>
+        <div class="flex flex-row items-center gap-[1ch]">
+          <div class="text-[30px] m-0.5">{{ title() }}</div>
+          <div class="empty:hidden size-4">
+            @switch (icon()) {
+              @case ('chat') {
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 40 40">
+                  <rect fill="var(--card-shadow)" y="27.6" width="32.6" height="4.3" />
+                  <rect fill="var(--card-shadow)" y="11.7" width="32.6" height="4.3" />
+                  <rect fill="var(--card-shadow)" x="7.4" y="19.7" width="32.6" height="4.3" />
+                  <rect fill="var(--color-primary-500)" y="24.1" width="32.6" height="4.3" />
+                  <rect fill="var(--color-primary-500)" y="8.1" width="32.6" height="4.3" />
+                  <rect fill="var(--color-primary-500)" x="7.4" y="16.1" width="32.6" height="4.3" />
+                </svg>
+              }
+              @case ('action') {
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 40 40">
+                  <rect fill="var(--card-shadow)" x="6.8" y="24.1" width="27.1" height="10.7" />
+                  <polygon fill="var(--card-shadow)" points="34.3 13.4 8.1 20.4 6.7 15.5 32.8 8.5 34.3 13.4" />
+                  <rect fill="var(--color-primary-500)" x="6.8" y="20.4" width="27.1" height="10.7" />
+                  <polygon fill="var(--color-primary-500)" points="33.3 10.1 7.2 17.1 5.7 12.2 31.9 5.2 33.3 10.1" />
+                </svg>
+              }
+            }
+          </div>
+        </div>
+
         <hr class="border-b-2 border-(--card-shadow)" />
       </div>
     }
@@ -234,6 +261,7 @@ export type CardColor = 'dark' | 'red' | 'green' | 'light-gray';
 export class CardComponent {
   public readonly title = input<string>()
   public readonly subtitle = input<string>()
+  public readonly icon = input<IconName | null>(null)
 
   public readonly color = input<CardColor>('dark')
 }

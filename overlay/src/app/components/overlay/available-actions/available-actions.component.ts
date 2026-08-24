@@ -99,7 +99,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
   selector: "app-available-actions",
   host: {class: "block"},
   template: `
-    <app-card title="Actions disponibles">
+    <app-card title="Actions disponibles" icon="action">
       @for (action of displayedActions(); track action) {
         <div class="flex gap-2 justify-between items-baseline">
           <div class="text-[26px]" [innerHTML]="action.description"></div>
