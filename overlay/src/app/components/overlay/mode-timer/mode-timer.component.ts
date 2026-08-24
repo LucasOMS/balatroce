@@ -2,7 +2,7 @@ import {Component, computed, DestroyRef, inject, signal} from "@angular/core";
 import {DecimalPipe} from "@angular/common";
 import {ModeTimerSocket} from "../../../services/mode-timer-socket";
 import {ActionMode} from "@shared/action-mode";
-import {CardComponent} from '../../card.component';
+import {CardColor, CardComponent} from '../../card.component';
 
 /** Formate une durée (ms) en `mm:ss`, jamais négative. */
 function formatDuration(ms: number): string {
@@ -25,7 +25,7 @@ function formatDuration(ms: number): string {
   template: `
 
     <div class="flex gap-1">
-      <app-card color="red" class="w-[170px] items-center justify-center text-center text-[32px]/[32px]">
+      <app-card [color]="cardColor()" class="w-[170px] items-center justify-center text-center text-[32px]/[32px]">
         Mode<br>{{ modeLabel() }}
       </app-card>
 
@@ -85,6 +85,9 @@ export class ModeTimerComponent {
   protected readonly donationAmount = computed(() => this.modeTimerSocket.modeTimerInfo()?.donationAmount ?? 0);
   protected readonly donationThreshold = computed(() => this.modeTimerSocket.modeTimerInfo()?.donationThreshold ?? 0);
   protected readonly totalDonationAmount = computed(() => this.modeTimerSocket.modeTimerInfo()?.totalDonationAmount ?? 0);
+  protected readonly cardColor = computed<CardColor>(() => {
+    return this.mode() === ActionMode.Democracy ? 'blue' : 'red';
+  });
 
   protected readonly remainingMs = computed(() => {
     const end = this.phaseEndTimestamp();

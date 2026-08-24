@@ -19,6 +19,9 @@
 
   --color-card-red-bg: #fe4c40;
   --color-card-red-shadow: #a72d23;
+
+  --color-card-blue-bg: #0093ff;
+  --color-card-blue-shadow: #005cab;
 }
 
 @theme {

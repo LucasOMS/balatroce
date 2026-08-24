@@ -1,6 +1,6 @@
 import {Component, input, ViewEncapsulation} from "@angular/core";
 
-export type CardColor = 'dark' | 'red' | 'green' | 'light-gray';
+export type CardColor = 'dark' | 'red' | 'green' | 'light-gray' | 'blue';
 
 type IconName = 'chat' | 'action';
 
@@ -12,6 +12,7 @@ type IconName = 'chat' | 'action';
     '[class.green]': 'color() === "green"',
     '[class.dark]': 'color() === "dark"',
     '[class.light-gray]': 'color() === "light-gray"',
+    '[class.blue]': 'color() === "blue"',
   },
   template: `
     @if (title()) {
@@ -56,7 +57,7 @@ type IconName = 'chat' | 'action';
 
     <ng-content></ng-content>
 
-    <div class="card-background {{ color() }}">
+    <div class="card-background">
       <svg
         class="bottom-edge"
         xmlns="http://www.w3.org/2000/svg"
@@ -169,6 +170,11 @@ type IconName = 'chat' | 'action';
         &.light-gray {
           --card-bg: var(--color-card-light-gray-bg);
           --card-shadow: var(--color-card-light-gray-shadow);
+        }
+
+        &.blue {
+          --card-bg: var(--color-card-blue-bg);
+          --card-shadow: var(--color-card-blue-shadow);
         }
 
         .card-background {
