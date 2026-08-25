@@ -17,7 +17,7 @@ import {CardModifierDescriptions} from './card-modifier-descriptions';
           <div class="card-info">
             <app-card-modifier-descriptions [card]="card" />
 
-            <div class="card-number text-outline-2">
+            <div class="card-number text-outline-2 text-play-card-number">
               <span>{{ num }}</span>
             </div>
           </div>
@@ -36,7 +36,6 @@ import {CardModifierDescriptions} from './card-modifier-descriptions';
   styles: `
     .card-number {
       font-size: 60px;
-      color: white;
       height: 70px;
       display: grid;
       place-content: center;

@@ -20,7 +20,7 @@ import {getCardDescription} from '../../../const/card-descriptions';
           class="extra-card-numbers"
           [style.--center]="currentExtraCardNumbers.length % 2 === 0 ? (currentExtraCardNumbers.length + 1) : currentExtraCardNumbers.length">
           @for (extraCardNumber of currentExtraCardNumbers; track extraCardNumber) {
-            <div class="card-number">
+            <div class="card-number text-play-card-number">
               <app-card class="p-1!">{{ extraCardNumber }}</app-card>
             </div>
           }
@@ -31,7 +31,7 @@ import {getCardDescription} from '../../../const/card-descriptions';
         @for (desc of baseCardDescriptions(); track desc) {
           @if (desc.length > 0) {
             <div class="relative flex flex-col gap-2">
-              <div class="card-number text-center text-outline-2 absolute left-1/2 -top-8 -translate-x-1/2">
+              <div class="card-number text-center text-outline-2 absolute left-1/2 -top-8 -translate-x-1/2 text-pack-consumable-number">
                 {{ $index + 1 }}
               </div>
 
@@ -49,7 +49,6 @@ import {getCardDescription} from '../../../const/card-descriptions';
   styles: `
     .card-number {
       font-size: 60px;
-      color: white;
       height: 50px;
       display: grid;
       place-content: center;

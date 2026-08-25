@@ -8,7 +8,7 @@ import {Area} from "@shared/game-state";
     @if (count() <= 2) {
       <div class="pack-count-{{ count() }}">
         @for (num of numbers(); track num) {
-          <div class="pack-number text-outline-2">
+          <div class="pack-number text-outline-2 text-pack-number">
             <span>{{ num }}</span>
           </div>
         }
@@ -23,7 +23,6 @@ import {Area} from "@shared/game-state";
   styles: `
     .pack-number {
       font-size: 60px;
-      color: white;
       position: absolute;
       height: 50px;
       display: grid;

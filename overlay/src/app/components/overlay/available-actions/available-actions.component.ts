@@ -10,7 +10,8 @@ interface Action {
 const actionsMetadata: Record<ActionKeyword, Action> = {
   [ActionKeyword.Play]:
     {
-      description: '<span class="action-keyword-letter">J</span>ouer une main', example: `${ActionKeyword.Play} 1 4 3`
+      description: '<span class="action-keyword-letter">J</span>ouer une main',
+      example: `${ActionKeyword.Play} <span class="text-play-card-number">1 4 3</span>`
     },
   [ActionKeyword.SelectBlind]:
     {
@@ -19,29 +20,30 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
     },
   [ActionKeyword.Discard]:
     {
-      description: '<span class="action-keyword-letter">D</span>éfausser', example: `${ActionKeyword.Discard} 2 3 6`
+      description: '<span class="action-keyword-letter">D</span>éfausser',
+      example: `${ActionKeyword.Discard} <span class="text-play-card-number">2 3 6</span>`
     },
   [ActionKeyword.RearrangeHand]: {
     description: '<span class="action-keyword-letter">R</span>éorganiser la <span class="action-keyword-letter">m</span>ain',
-    example: `${ActionKeyword.RearrangeHand} 1 3 2 4`
+    example: `${ActionKeyword.RearrangeHand} <span class="text-play-card-number">1 3 2 4</span>`
   },
   [ActionKeyword.RearrangeConsumables]: {
     description: '<span class="action-keyword-letter">R</span>éorganiser les <span class="action-keyword-letter">c</span>onsommables',
-    example: `${ActionKeyword.RearrangeConsumables} 2 1`
+    example: `${ActionKeyword.RearrangeConsumables} <span class="text-consumable-card-number">2 1</span>`
   },
   [ActionKeyword.RearrangeJokers]: {
     description: '<span class="action-keyword-letter">R</span>éorganiser les <span class="action-keyword-letter">j</span>okers',
-    example: `${ActionKeyword.RearrangeJokers} 3 1 2 4`
+    example: `${ActionKeyword.RearrangeJokers} <span class="text-joker-number">3 1 2 4</span>`
   },
   [ActionKeyword.SellConsumable]:
     {
       description: '<span class="action-keyword-letter">V</span>endre un <span class="action-keyword-letter">c</span>onsommable',
-      example: `${ActionKeyword.SellConsumable} 2`
+      example: `${ActionKeyword.SellConsumable} <span class="text-consumable-card-number">2</span>`
     },
   [ActionKeyword.SellJoker]:
     {
       description: '<span class="action-keyword-letter">V</span>endre un <span class="action-keyword-letter">j</span>oker',
-      example: `${ActionKeyword.SellJoker} 4`
+      example: `${ActionKeyword.SellJoker} <span class="text-joker-number">4</span>`
     },
   [ActionKeyword.SkipBlind]:
     {
@@ -51,27 +53,27 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
   [ActionKeyword.UseConsumable]:
     {
       description: '<span class="action-keyword-letter">U</span>tiliser un <span class="action-keyword-letter">c</span>onsommable',
-      example: `${ActionKeyword.UseConsumable} 1`
+      example: `${ActionKeyword.UseConsumable} <span class="text-consumable-card-number">1</span> <span class="text-play-card-number">1</span>`
     },
   [ActionKeyword.BuyCard]:
     {
       description: '<span class="action-keyword-letter">A</span>cheter une <span class="action-keyword-letter">c</span>arte',
-      example: `${ActionKeyword.BuyCard} 2`
+      example: `${ActionKeyword.BuyCard} <span class="text-buyable-number">2</span>`
     },
   [ActionKeyword.BuyVoucher]:
     {
       description: '<span class="action-keyword-letter">A</span>cheter un <span class="action-keyword-letter">cou</span>pon',
-      example: `${ActionKeyword.BuyVoucher} 1`
+      example: `${ActionKeyword.BuyVoucher} <span class="text-voucher-number">1</span>`
     },
   [ActionKeyword.BuyPack]:
     {
       description: '<span class="action-keyword-letter">A</span>cheter un <span class="action-keyword-letter">p</span>ack',
-      example: `${ActionKeyword.BuyPack} 1`
+      example: `${ActionKeyword.BuyPack} <span class="text-pack-number">1</span>`
     },
   [ActionKeyword.PackSelect]:
     {
       description: '<span class="action-keyword-letter">S</span>électionner dans le <span class="action-keyword-letter">P</span>ack',
-      example: `${ActionKeyword.PackSelect} 1`
+      example: `${ActionKeyword.PackSelect} <span class="text-pack-consumable-number">1</span> <span class="text-play-card-number">1</span>`
     },
   [ActionKeyword.PackSkip]:
     {
@@ -103,7 +105,7 @@ const actionsMetadata: Record<ActionKeyword, Action> = {
       @for (action of displayedActions(); track action) {
         <div class="flex gap-2 justify-between items-baseline">
           <div class="text-[26px]" [innerHTML]="action.description"></div>
-          <div class="text-[22px] text-primary-500 text-right">{{ action.example }}</div>
+          <div class="text-[22px] text-primary-500 text-right" [innerHTML]="action.example"></div>
         </div>
       }
     </app-card>

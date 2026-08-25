@@ -9,7 +9,7 @@ import {Area} from "@shared/game-state";
     @if (count() <= 9) {
       <div class="joker-count-{{ count() }}">
         @for (num of numbers(); track num) {
-          <div class="joker-number text-outline-2">
+          <div class="joker-number text-outline-2 text-joker-number">
             <span>{{ num }}</span>
           </div>
         }
@@ -24,7 +24,6 @@ import {Area} from "@shared/game-state";
   styles: `
     .joker-number {
       font-size: 60px;
-      color: white;
       position: absolute;
       height: 70px;
       display: grid;

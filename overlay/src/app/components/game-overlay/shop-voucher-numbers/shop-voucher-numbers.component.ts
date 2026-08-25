@@ -8,7 +8,7 @@ import {Area} from "@shared/game-state";
     @if (count() > 0 && count() < 3) {
       <div class="voucher-count-{{ count() }}">
         @for (num of numbers(); track num) {
-          <div class="voucher-number text-outline-2">
+          <div class="voucher-number text-outline-2 text-voucher-number">
             <span>{{ num }}</span>
           </div>
         }
@@ -19,7 +19,6 @@ import {Area} from "@shared/game-state";
   styles: `
     .voucher-number {
       font-size: 60px;
-      color: white;
       position: absolute;
       height: 70px;
       display: grid;

@@ -22,6 +22,15 @@
 
   --color-card-blue-bg: #0093ff;
   --color-card-blue-shadow: #005cab;
+
+
+  --color-play-card-number: white;
+  --color-joker-number: #0093ff;
+  --color-consumable-card-number: #ff4c40;
+  --color-pack-number: #35bd86;
+  --color-buyable-number: #f5b244;
+  --color-pack-consumable-number: #f5b244;
+  --color-voucher-number: #b92b52;
 }
 
 @theme {
