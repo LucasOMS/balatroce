@@ -42,7 +42,7 @@ pause
 exit /b 0
 
 :ensure_node
-rem --- Verifie si Node.js 22+ est deja installe et accessible ---
+rem --- Check whether Node.js 22+ is already installed and available ---
 where node >nul 2>nul
 if not errorlevel 1 (
     for /f "delims=" %%v in ('node -e "console.log(process.versions.node.split('.')[0])" 2^>nul') do set NODE_MAJOR=%%v
@@ -59,7 +59,7 @@ if not errorlevel 1 (
 echo Node.js 22+ introuvable. Tentative d'installation automatique...
 echo.
 
-rem --- Tentative via winget (present par defaut sur Windows 10/11 recents) ---
+rem --- Try winget first (available by default on recent Windows 10/11 systems) ---
 where winget >nul 2>nul
 if not errorlevel 1 (
     echo Installation via winget...
@@ -76,7 +76,7 @@ if not errorlevel 1 (
     echo winget n'est pas disponible sur ce PC.
 )
 
-rem --- Tentative via Chocolatey, si deja installe ---
+rem --- Try Chocolatey when it is already installed ---
 where choco >nul 2>nul
 if not errorlevel 1 (
     echo Installation via Chocolatey...
@@ -96,8 +96,32 @@ if not errorlevel 1 (
 exit /b 1
 
 :refresh_path
-rem --- Ajoute les emplacements habituels de Node.js au PATH de cette session ---
-if exist "%ProgramFiles%\nodejs\node.exe" set "PATH=%ProgramFiles%\nodejs;%PATH%"
-if exist "%ProgramFiles(x86)%\nodejs\node.exe" set "PATH=%ProgramFiles(x86)%\nodejs;%PATH%"
-if exist "%ProgramData%\chocolatey\bin\node.exe" set "PATH=%ProgramData%\chocolatey\bin;%PATH%"
+rem --- Add Node.js locations to both the current session and the persistent user PATH ---
+if exist "%ProgramFiles%\nodejs\node.exe" call :add_to_path "%ProgramFiles%\nodejs"
+if exist "%ProgramFiles(x86)%\nodejs\node.exe" call :add_to_path "%ProgramFiles(x86)%\nodejs"
+if exist "%ProgramData%\chocolatey\bin\node.exe" call :add_to_path "%ProgramData%\chocolatey\bin"
+exit /b 0
+
+:add_to_path
+set "PATH_ENTRY=%~1"
+
+rem --- Make the executable immediately available to the current setup process ---
+echo ;!PATH!; | findstr /I /C:";!PATH_ENTRY!;" >nul
+if errorlevel 1 set "PATH=!PATH_ENTRY!;!PATH!"
+
+rem --- Persist the entry for future processes without duplicating existing entries ---
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$entry = [Environment]::ExpandEnvironmentVariables('%PATH_ENTRY%');" ^
+    "$userPath = [Environment]::GetEnvironmentVariable('Path', 'User');" ^
+    "$entries = @($userPath -split ';' | Where-Object { $_ });" ^
+    "if (-not ($entries | Where-Object { $_.TrimEnd('\\') -ieq $entry.TrimEnd('\\') })) {" ^
+    "  $newPath = (($entries + $entry) -join ';');" ^
+    "  [Environment]::SetEnvironmentVariable('Path', $newPath, 'User');" ^
+    "}"
+
+if errorlevel 1 (
+    echo [ERREUR] Impossible d'ajouter %PATH_ENTRY% au PATH utilisateur.
+    exit /b 1
+)
+
 exit /b 0
