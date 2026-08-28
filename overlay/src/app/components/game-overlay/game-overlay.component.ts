@@ -15,6 +15,7 @@ import {JokerDescriptionsComponent} from './joker-descriptions/joker-description
 import {OverlayInfo} from '@shared/overlay-info';
 import {SealDescriptionsComponent} from './seal-descriptions/seal-descriptions.component';
 import {PackOpeningComponent} from './pack-opening/pack-opening.component';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: "app-game-overlay",
@@ -38,6 +39,7 @@ import {PackOpeningComponent} from './pack-opening/pack-opening.component';
   templateUrl: "./game-overlay.component.html",
 })
 export class GameOverlayComponent {
+  protected readonly useChromaKeyBackground = environment.gameOverlay.useChromaKeyBackground;
   protected readonly captureVideoRef = viewChild<ElementRef<HTMLVideoElement>>("captureVideo");
   protected readonly captureStream = signal<MediaStream | null>(null);
 
@@ -70,4 +72,3 @@ export class GameOverlayComponent {
 
   protected readonly GameCycleState = GameCycleState;
 }
-
