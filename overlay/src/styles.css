@@ -7,6 +7,7 @@
   --side-overlay-width: 425px;
 
   --color-shadow: #040e0f;
+  --color-chroma-key: #ff00ff;
 
   --color-card-dark-bg: #162423;
   --color-card-dark-shadow: var(--color-shadow);
