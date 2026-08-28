@@ -178,8 +178,22 @@ export class GameCycleService implements OnModuleInit {
             }
             case BotMethod.USE: {
                 const useAction = action;
-                if (useAction.params.consumable > consumableCount - 1) {
+                const {consumable, cards} = useAction.params;
+
+                if (consumable < 0 || consumable >= consumableCount) {
                     return false;
+                }
+
+                if (cards !== undefined) {
+                    if (this.currentGameState.state !== GameCycleState.SELECTING_HAND) {
+                        return false;
+                    }
+                    if (
+                        cards.length === 0 ||
+                        cards.some((cardIndex) => cardIndex < 0 || cardIndex >= handSize)
+                    ) {
+                        return false;
+                    }
                 }
                 break;
             }
