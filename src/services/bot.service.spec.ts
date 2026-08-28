@@ -52,4 +52,17 @@ describe("BotService", () => {
       },
     ]);
   });
+
+  it("forwards targeted consumable use unchanged", async () => {
+    const action: ChatAction = {
+      method: BotMethod.USE,
+      params: {consumable: 0, cards: [1, 3]},
+    };
+    sendRequest.mockResolvedValueOnce({});
+
+    await service.useRaw(action);
+
+    expect(sendRequest).toHaveBeenCalledTimes(1);
+    expect(sendRequest).toHaveBeenCalledWith(action);
+  });
 });
