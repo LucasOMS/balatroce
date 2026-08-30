@@ -1,4 +1,5 @@
 import {Card, CardSet, GameState} from "@shared/game-state"
+import {PlayingCardColor, SUITS} from "../utils/performed-action-display";
 
 export const JOKER_DESCRIPTIONS: Record<string, string> = {
   "j_joker": '<span class="text-mult">+4</span> Multi.',
@@ -308,5 +309,36 @@ export function getCardDescription(card: Card, hands?: GameState['hands']): stri
   }
 
   return description;
+}
+
+/** Une carte à jouer standard (Standard, éventuellement améliorée) est considérée
+ * comme "modifiée" si elle porte une amélioration, un sceau et/ou une édition. */
+export function isModifiedPlayingCard(card: Card): boolean {
+  if (![CardSet.DEFAULT, CardSet.ENHANCED].includes(card.set)) {
+    return false;
+  }
+  return card.set === CardSet.ENHANCED
+    || card.modifier.seal !== null
+    || card.modifier.edition !== null;
+}
+
+export interface PlayingCardValueDisplay {
+  rank: string;
+  suit: string;
+  color: PlayingCardColor;
+}
+
+/** Formate le rang et la couleur (♥♦♣♠) d'une carte à jouer, pour un affichage
+ * compact permettant de savoir de quelle carte il s'agit malgré la description. */
+export function getPlayingCardValueDisplay(card: Card): PlayingCardValueDisplay | null {
+  const suit = card.value.suit ? SUITS[card.value.suit.toUpperCase()] : undefined;
+  if (!suit || !card.value.rank) {
+    return null;
+  }
+  return {
+    rank: card.value.rank.toUpperCase() === "T" ? "10" : card.value.rank.toUpperCase(),
+    suit: suit.symbol,
+    color: suit.color,
+  };
 }
 

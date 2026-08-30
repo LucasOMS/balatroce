@@ -2,7 +2,7 @@ import {Component, computed, effect, input} from "@angular/core";
 import {Area, CardSet} from "@shared/game-state";
 import {CardComponent} from '../../card.component';
 import {AutoFitTextComponent} from '../../auto-fit-text/auto-fit-text.component';
-import {getCardDescription} from '../../../const/card-descriptions';
+import {getCardDescription, getPlayingCardValueDisplay, isModifiedPlayingCard, PlayingCardValueDisplay} from '../../../const/card-descriptions';
 
 @Component({
   selector: "app-pack-opening",
@@ -36,9 +36,20 @@ import {getCardDescription} from '../../../const/card-descriptions';
               </div>
 
               <app-card class="base-card-description h-full flex items-center justify-center rounded-[16px] text-center">
-                <app-auto-fit-text baseFontSize="24" class="**:items-center">
-                  <div [innerHTML]="desc"></div>
-                </app-auto-fit-text>
+                @let cardValue = baseCardValues()[$index];
+                <div class="flex flex-col items-center gap-1 w-full h-full min-h-0">
+                  @if (cardValue) {
+                    <span
+                      class="inline-flex items-center rounded bg-white px-1 font-bold text-[24px] leading-none shrink-0"
+                      [class.text-red-600]="cardValue.color === 'red'"
+                      [class.text-black]="cardValue.color === 'black'">
+                      {{ cardValue.rank }}{{ cardValue.suit }}
+                    </span>
+                  }
+                  <app-auto-fit-text baseFontSize="24" class="**:items-center min-h-0 flex-1">
+                    <div [innerHTML]="desc"></div>
+                  </app-auto-fit-text>
+                </div>
               </app-card>
             </div>
           }
@@ -131,7 +142,19 @@ export class PackOpeningComponent {
 
   public readonly baseCardCount = computed(() => this.pack().count)
 
-  protected readonly baseCardDescriptions = computed<string[]>(() => this.pack().cards.map(c => getCardDescription(c)));
+  protected readonly baseCardDescriptions = computed<string[]>(() => this.pack().cards.map(c =>
+    // Les cartes à jouer standards (pack Standard) n'ont d'intérêt à afficher leur effet
+    // (ex: "+30 jetons") que si elles ont été modifiées (amélioration, sceau, édition) :
+    // une carte de base non modifiée se voit déjà clairement sur la carte elle-même.
+    ![CardSet.DEFAULT, CardSet.ENHANCED].includes(c.set) || isModifiedPlayingCard(c) ? getCardDescription(c) : ''
+  ));
+
+  // Quand une carte à jouer modifiée affiche sa description, celle-ci masque la carte
+  // réelle : on affiche donc aussi son rang et sa couleur (♥♦♣♠) pour ne pas perdre
+  // l'information de quelle carte il s'agit.
+  protected readonly baseCardValues = computed<(PlayingCardValueDisplay | null)[]>(() => this.pack().cards.map((c, i) =>
+    this.baseCardDescriptions()[i]?.length > 0 && isModifiedPlayingCard(c) ? getPlayingCardValueDisplay(c) : null
+  ));
 
   protected readonly extraCardNumbers = computed<number[]>(() => Array.from({length: this.handSize()}).map((_, i) => i + 1));
 

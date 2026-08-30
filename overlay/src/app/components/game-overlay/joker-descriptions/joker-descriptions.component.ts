@@ -30,7 +30,7 @@ import {JOKER_DESCRIPTIONS} from '../../../const/card-descriptions';
     .joker-descriptions {
       position: fixed;
       position-anchor: --game;
-      top: calc(anchor(top) - 110px);
+      top: calc(anchor(top) - 130px);
       left: calc(anchor(left) + 519px);
       width: 843px;
       height: var(--joker-card-height);

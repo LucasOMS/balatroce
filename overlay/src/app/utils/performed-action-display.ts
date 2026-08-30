@@ -11,7 +11,7 @@ export type PerformedActionDisplayPart =
   color: PlayingCardColor;
 };
 
-const SUITS: Record<string, { symbol: string; color: PlayingCardColor }> = {
+export const SUITS: Record<string, { symbol: string; color: PlayingCardColor }> = {
   H: {symbol: "♥", color: "red"},
   D: {symbol: "♦", color: "red"},
   C: {symbol: "♣", color: "black"},

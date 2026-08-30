@@ -3,11 +3,11 @@
 @source "./**/*.{ts,html}";
 
 @theme static {
-  --joker-card-height: 150px;
+  --joker-card-height: 180px;
   --side-overlay-width: 425px;
 
   --color-shadow: #040e0f;
-  --color-chroma-key: #ff00ff;
+  --color-chroma-key: transparent;
 
   --color-card-dark-bg: #162423;
   --color-card-dark-shadow: var(--color-shadow);
@@ -60,6 +60,7 @@
 
 body {
   font-family: "M6x11", sans-serif;
+  background: transparent !important;
 }
 
 @utility action-keyword-letter {
@@ -78,20 +79,6 @@ body {
   color: white;
   padding: 0 0.4ch;
   border-radius: 0.4em;
-}
-
-@utility bg-zevent {
-  background-image: url("/bg-zevent.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center center;
-}
-
-@utility bg-balatro {
-  background-image: url("/bg-balatro.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center center;
 }
 
 @utility text-outline-* {

@@ -81,15 +81,20 @@ export class GameCycleService implements OnModuleInit {
                     BotMethod.REARRANGE,
                 ];
                 break;
-            case GameCycleState.BLIND_SELECT:
+            case GameCycleState.BLIND_SELECT: {
+                // La blinde boss ne peut jamais être passée (règle du jeu : le
+                // bouton "Skip" n'existe pas pour elle), on retire donc SKIP
+                // des méthodes valides lorsque c'est elle qui est sélectionnable.
+                const isBossBlindSelectable = this.currentGameState.blinds.boss.status === "SELECT";
                 validMethods = [
                     BotMethod.SELECT,
-                    BotMethod.SKIP,
+                    ...(isBossBlindSelectable ? [] : [BotMethod.SKIP]),
                     BotMethod.SELL,
                     BotMethod.USE,
                     BotMethod.REARRANGE,
                 ];
                 break;
+            }
             case GameCycleState.MENU:
                 validMethods = [BotMethod.START];
                 break;

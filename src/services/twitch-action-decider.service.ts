@@ -50,6 +50,15 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
   /** Émet à chaque fois que l'état du timer ou le décompte des votes change */
   public readonly voteInfoChanged$: Observable<unknown>;
 
+  private readonly voteEndedSubject = new Subject<void>();
+  /**
+   * Émet à chaque fin de vote (avant même de savoir si une action valide en
+   * ressort). Sert notamment à déclencher un renvoi de l'état courant complet
+   * à l'overlay, pour qu'un éventuel état "invalide" se répare automatiquement
+   * au plus tard au bout d'un cycle de vote.
+   */
+  public readonly voteEnded$ = this.voteEndedSubject.asObservable();
+
   constructor(
     private readonly collector: TwitchMessageCollectorService,
     private readonly modeManagerService: ModeManagerService,
@@ -170,6 +179,7 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     this.logger.log(`Fin du vote : ${orderedEntries.length.toString()} action(s) ordonnée(s)`);
     this.actionsResultSubject.next(orderedEntries.map((entry) => entry.action));
     this.collector.clear();
+    this.voteEndedSubject.next();
 
     this.state = VoteTimerState.DELAY;
     this.endTimestamp = Date.now() + TwitchActionDeciderService.DELAY_DURATION_MS;
@@ -209,3 +219,5 @@ export class TwitchActionDeciderService implements OnModuleDestroy {
     return [...grouped.values()];
   }
 }
+
+

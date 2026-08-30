@@ -32,6 +32,12 @@ export class OverlaySocketService implements OnModuleInit {
         this.twitchActionDecider.voteInfoChanged$.subscribe(() => {
             this.broadcastVoteUpdate();
         });
+        this.twitchActionDecider.voteEnded$.subscribe(() => {
+            // Renvoie l'état courant complet à chaque fin de vote, indépendamment
+            // du reste : cela permet à un éventuel état "invalide" côté overlay
+            // de s'auto-réparer au plus tard au bout d'un cycle de vote.
+            void this.update();
+        });
         this.modeManagerService.modeChanged$.subscribe(() => {
             this.broadcastModeUpdate();
         });

@@ -16,7 +16,7 @@ type IconName = 'chat' | 'action';
   },
   template: `
     @if (title()) {
-      <div>
+      <div class="bg-(--card-bg) z-10">
         <div class="flex flex-row items-center gap-[1ch]">
           <div class="text-[30px] m-0.5">{{ title() }}</div>
           <div class="empty:hidden size-4">

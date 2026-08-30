@@ -31,7 +31,7 @@ import {OverlaySocket} from '../../../services/overlay-socket';
     .consumable-descriptions {
       position: fixed;
       position-anchor: --game;
-      top: calc(anchor(top) - 110px);
+      top: calc(anchor(top) - 130px);
       left: calc(anchor(left) + 1379px);
       width: 390px;
       height: var(--joker-card-height);
