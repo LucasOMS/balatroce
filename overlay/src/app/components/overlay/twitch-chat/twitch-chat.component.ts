@@ -28,7 +28,7 @@ interface DisplayedChatMessage {
       <div #scrollContainer class="flex-1 flex-col-reverse min-h-0 overflow-y-clip flex flex-col gap-1 -mt-2">
         @for (item of displayedMessages(); track item.id) {
           <div class="text-[20px] leading-tight break-words" [class.chat-message-enter]="item.animate">
-            <span class="text-zevent-300">{{ item.username }}</span><span class="text-white">:&nbsp;</span>
+            <span class="text-primary-500">{{ item.username }}</span><span class="text-white">:&nbsp;</span>
             @for (segment of item.segments; track $index) {
               @if (segment.type === 'text') {
                 <span class="text-white whitespace-pre-wrap">{{ segment.value }}</span>
