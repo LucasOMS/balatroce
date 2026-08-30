@@ -23,14 +23,14 @@ import { ModeManagerService } from "./mode-manager.service";
  * atteint.
  *
  * Variables d'environnement :
- * - TWITCH_VOTE_DURATION_MS : durée (ms) de la phase de vote (défaut 20000)
+ * - TWITCH_VOTE_DURATION_MS : durée (ms) de la phase de vote (défaut 25000)
  * - TWITCH_VOTE_DELAY_MS : durée (ms) de la phase de délai entre deux votes,
- *   pour laisser passer les messages "en retard" (défaut 5000)
+ *   pour laisser passer les messages "en retard" (défaut 7500)
  */
 @Injectable()
 export class TwitchActionDeciderService implements OnModuleDestroy {
-  static readonly VOTE_DURATION_MS = parseInt(process.env.TWITCH_VOTE_DURATION_MS ?? "20000", 10);
-  static readonly DELAY_DURATION_MS = parseInt(process.env.TWITCH_VOTE_DELAY_MS ?? "5000", 10);
+  static readonly VOTE_DURATION_MS = parseInt(process.env.TWITCH_VOTE_DURATION_MS ?? "25000", 10);
+  static readonly DELAY_DURATION_MS = parseInt(process.env.TWITCH_VOTE_DELAY_MS ?? "7500", 10);
 
   private readonly logger = new Logger(TwitchActionDeciderService.name);
 

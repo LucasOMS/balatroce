@@ -14,7 +14,7 @@ import {SquareProgressComponent} from './square-progress.component';
         thickness="8"
         class="rounded-[16px] overflow-hidden"
         [style.--frame-color]="'white'"
-        [style.--progress-color]="'#39cf37'"
+        [style.--progress-color]="state() === VoteTimerState.RUNNING ? 'var(--color-primary-500)' : 'var(--color-between-vote)'"
       ></app-square-progress>
     }
   `,
@@ -85,8 +85,8 @@ export class DelayCountComponent {
   }
 
   /** Durée (ms) de la phase de vote, doit rester synchronisée avec TWITCH_VOTE_DURATION_MS côté serveur */
-  private static readonly VOTE_DURATION_MS = 20000;
+  private static readonly VOTE_DURATION_MS = 25000;
   /** Durée (ms) de la phase de délai avant le prochain vote, doit rester synchronisée avec TWITCH_VOTE_DELAY_MS côté serveur */
-  private static readonly DELAY_DURATION_MS = 5000;
+  private static readonly DELAY_DURATION_MS = 7500;
 }
 

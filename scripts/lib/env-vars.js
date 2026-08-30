@@ -49,13 +49,13 @@ module.exports = [
     {
         name: "TWITCH_VOTE_DURATION_MS",
         description: "Durée (en millisecondes) de la période de vote du chat pour choisir une action.",
-        default: "20000",
+        default: "25000",
     },
     {
         name: "TWITCH_VOTE_DELAY_MS",
         description:
             "Durée (en millisecondes) du délai après la fin du vote, pour laisser passer les messages en retard.",
-        default: "5000",
+        default: "7500",
     },
     {
         name: "ANARCHY_BIAS_ENABLED",
@@ -137,4 +137,5 @@ module.exports = [
         default: "data\\player-commands.log",
     },
 ];
+
 
