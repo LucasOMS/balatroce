@@ -24,7 +24,7 @@ if not exist "node_modules" (
     exit /b 1
 )
 
-if not exist "dist\main.js" (
+if not exist "dist\src\main.js" (
     echo Le serveur n'est pas encore compile, compilation en cours...
     call npm run build
     if errorlevel 1 (
@@ -56,4 +56,5 @@ echo Vous pouvez fermer cette fenetre.
 echo.
 pause
 exit /b 0
+
 

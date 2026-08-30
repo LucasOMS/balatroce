@@ -11,7 +11,10 @@ const { setPersistentEnvVar } = require("./lib/env-persist");
 const PROJECT_ROOT = path.join(__dirname, "..");
 const OVERLAY_ROOT = path.join(PROJECT_ROOT, "overlay");
 const MODS_SOURCE = path.join(PROJECT_ROOT, "ressources", "Mods");
+const VERSION_DLL_SOURCE = path.join(PROJECT_ROOT, "ressources", "version.dll");
 const BALATRO_APPDATA = path.join(process.env.APPDATA || "", "Balatro");
+const BALATRO_MODS_DIR = path.join(BALATRO_APPDATA, "Mods");
+const DEFAULT_STEAM_PATH = "C:\\Program Files (x86)\\Steam";
 
 function log(msg) {
     console.log(msg);
@@ -41,6 +44,59 @@ function runIn(cwd, command) {
 function copyRecursive(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
     fs.cpSync(src, dest, { recursive: true, force: true });
+}
+
+/** Lit une valeur de chaîne (REG_SZ) dans le registre Windows. Retourne null si introuvable. */
+function queryRegistryValue(key, value) {
+    try {
+        const output = execSync(`reg query "${key}" /v ${value}`, { stdio: ["ignore", "pipe", "ignore"] }).toString();
+        const match = output.match(/REG_(?:SZ|EXPAND_SZ)\s+(.+)/);
+        return match ? match[1].trim() : null;
+    } catch {
+        return null;
+    }
+}
+
+/** Détermine le dossier d'installation de Steam (registre, sinon chemin par défaut). */
+function findSteamInstallPath() {
+    return (
+        queryRegistryValue("HKCU\\Software\\Valve\\Steam", "SteamPath") ||
+        queryRegistryValue("HKLM\\SOFTWARE\\WOW6432Node\\Valve\\Steam", "InstallPath") ||
+        queryRegistryValue("HKLM\\SOFTWARE\\Valve\\Steam", "InstallPath") ||
+        DEFAULT_STEAM_PATH
+    );
+}
+
+/** Liste tous les dossiers de bibliothèque Steam (installation par défaut + bibliothèques additionnelles). */
+function getSteamLibraryFolders(steamPath) {
+    const libraries = [steamPath];
+    const vdfPath = path.join(steamPath, "steamapps", "libraryfolders.vdf");
+    if (fs.existsSync(vdfPath)) {
+        try {
+            const content = fs.readFileSync(vdfPath, "utf8");
+            const regex = /"path"\s+"([^"]+)"/g;
+            let match;
+            while ((match = regex.exec(content))) {
+                libraries.push(match[1].replace(/\\\\/g, "\\"));
+            }
+        } catch {
+            // Fichier illisible : on se contente du dossier Steam par défaut.
+        }
+    }
+    return libraries;
+}
+
+/** Cherche le dossier d'installation du jeu Balatro dans toutes les bibliothèques Steam connues. */
+function findBalatroGameDir() {
+    const steamPath = findSteamInstallPath();
+    const libraries = getSteamLibraryFolders(steamPath);
+    for (const library of libraries) {
+        const candidate = path.join(library, "steamapps", "common", "Balatro");
+        if (fs.existsSync(candidate)) {
+            return candidate;
+        }
+    }
+    return path.join(DEFAULT_STEAM_PATH, "steamapps", "common", "Balatro");
 }
 
 async function installDependenciesAndBuild() {
@@ -145,12 +201,36 @@ async function copyMods() {
     }
 
     try {
-        fs.mkdirSync(BALATRO_APPDATA, { recursive: true });
-        copyRecursive(MODS_SOURCE, BALATRO_APPDATA);
-        log(`✔ Mods copiés dans ${BALATRO_APPDATA}`);
+        fs.mkdirSync(BALATRO_MODS_DIR, { recursive: true });
+        copyRecursive(MODS_SOURCE, BALATRO_MODS_DIR);
+        log(`✔ Mods copiés dans ${BALATRO_MODS_DIR}`);
     } catch (err) {
         console.warn(`⚠️  Impossible de copier les mods automatiquement : ${err.message}`);
-        console.warn(`   Copiez manuellement le contenu de ${MODS_SOURCE} dans ${BALATRO_APPDATA}`);
+        console.warn(`   Copiez manuellement le contenu de ${MODS_SOURCE} dans ${BALATRO_MODS_DIR}`);
+    }
+}
+
+async function copyVersionDll() {
+    step("Installation de l'injecteur Lovely (version.dll)");
+
+    if (!fs.existsSync(VERSION_DLL_SOURCE)) {
+        console.warn(`⚠️  Fichier ${VERSION_DLL_SOURCE} introuvable, cette étape est ignorée.`);
+        return;
+    }
+
+    const gameDir = findBalatroGameDir();
+    if (!fs.existsSync(gameDir)) {
+        console.warn(`⚠️  Dossier d'installation de Balatro introuvable (${gameDir}).`);
+        console.warn(`   Copiez manuellement ${VERSION_DLL_SOURCE} dans le dossier d'installation de Balatro.`);
+        return;
+    }
+
+    try {
+        fs.copyFileSync(VERSION_DLL_SOURCE, path.join(gameDir, "version.dll"));
+        log(`✔ version.dll copié dans ${gameDir}`);
+    } catch (err) {
+        console.warn(`⚠️  Impossible de copier version.dll automatiquement : ${err.message}`);
+        console.warn(`   Copiez-le manuellement dans ${gameDir}`);
     }
 }
 
@@ -174,6 +254,7 @@ async function main() {
     await setupEnvironmentVariables();
     await ensureBalatroInstalled();
     await copyMods();
+    await copyVersionDll();
     await loadSave();
 
     console.log("\n✅ Installation terminée.");
@@ -186,6 +267,10 @@ main().catch((err) => {
     console.error(err && err.message ? err.message : err);
     process.exitCode = 1;
 });
+
+
+
+
 
 
 
