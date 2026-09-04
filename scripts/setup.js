@@ -100,7 +100,15 @@ function findBalatroGameDir() {
 }
 
 async function installDependenciesAndBuild() {
-    step("Installation des dépendances (npm install)");
+    step("Installation des dépendances overlay (npm install)");
+    try {
+        run("cd overlay && npm install && cd ..");
+    } catch (err) {
+        console.error("❌ 'npm install' a échoué. Vérifiez votre connexion internet puis relancez le script.");
+        throw err;
+    }
+    
+    step("Installation des dépendances serveur (npm install)");
     try {
         run("npm install");
     } catch (err) {
