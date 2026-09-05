@@ -8,7 +8,7 @@ import {OverlaySocket} from '../../../services/overlay-socket';
   selector: "app-shop-card-descriptions",
   host: {class: "block"},
   template: `
-    @if (count() <= 2 && count() > 0) {
+    @if (count() <= 3 && count() > 0) {
       <div class="card-count-{{ count() }}">
         @for (desc of descriptions(); track desc) {
           @if (desc.length > 0) {
@@ -56,6 +56,25 @@ import {OverlaySocket} from '../../../services/overlay-socket';
       > :nth-child(2) {
         bottom: 415px;
         left: 1347px;
+      }
+    }
+
+    .card-count-3 {
+      > * {
+        bottom: 441px;
+        height: 223px;
+      }
+
+      > :nth-child(1) {
+        left: 920px;
+      }
+
+      > :nth-child(2) {
+        left: 1097px;
+      }
+
+      > :nth-child(3) {
+        left: 1272px;
       }
     }
   `

@@ -5,7 +5,7 @@ import {Area} from "@shared/game-state";
   selector: "app-shop-card-numbers",
   host: {class: "block"},
   template: `
-    @if (count() <= 2) {
+    @if (count() <= 3) {
       <div class="card-count-{{ count() }}">
         @for (num of numbers(); track num) {
           <div class="card-number text-outline-2 text-buyable-number">
@@ -31,8 +31,8 @@ import {Area} from "@shared/game-state";
 
     .error-message {
       position: absolute;
-      bottom: 280px;
-      left: 598px;
+      bottom: 390px;
+      left: 840px;
       color: white;
       font-size: 26px;
       text-align: center;
@@ -60,6 +60,23 @@ import {Area} from "@shared/game-state";
       > :nth-child(2) {
         bottom: 398px;
         left: 1187px;
+      }
+    }
+
+    .card-count-3 {
+      > :nth-child(1) {
+        bottom: 398px;
+        left: 920px;
+      }
+
+      > :nth-child(2) {
+        bottom: 398px;
+        left: 1097px;
+      }
+
+      > :nth-child(3) {
+        bottom: 398px;
+        left: 1275px;
       }
     }
   `
