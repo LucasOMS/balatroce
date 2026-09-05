@@ -29,6 +29,34 @@ export class GameCycleService implements OnModuleInit {
     /** Durée (ms) d'affichage du message de victoire avant de passer au deck suivant */
     private static readonly WIN_MESSAGE_DURATION_MS = 5000;
 
+    /**
+     * Délai (ms) attendu après avoir détecté l'état ROUND_EVAL avant d'envoyer
+     * la commande de cash out.
+     *
+     * Le jeu construit l'écran de décompte des gains (blinde, mains/défausses
+     * restantes, jokers, tags, intérêts) au moyen d'une série d'animations
+     * différées ; le bouton de cash out n'apparaît qu'une fois toutes ces
+     * animations terminées. Si on encaisse avant la fin, le jeu plante avec
+     * une erreur "attempt to index field 'round_eval' (a nil value)" car
+     * l'écran est détruit pendant que des animations de gains sont encore en
+     * attente. Comme l'état exposé par le mod ne permet pas de savoir depuis
+     * ce côté-ci quand l'écran est réellement prêt, on attend simplement un
+     * délai fixe.
+     *
+     * Chaque ligne de gain ajoute environ 0.7s d'animation (jusqu'à 7 lignes
+     * maximum, plafonnées par le jeu), plus ~1s pour le séparateur et la
+     * ligne finale : le pire des cas (beaucoup de jokers à dollars) prend
+     * environ 6 à 7s, mais la plupart des manches n'affichent que quelques
+     * lignes (voire aucune, comme lors du crash initial avec 0 main/défausse
+     * restante) et se terminent bien plus vite. On garde donc une valeur par
+     * défaut modeste ; augmentez `ROUND_EVAL_SETTLE_DELAY_MS` si des crashs
+     * surviennent malgré tout avec un run à beaucoup de jokers "money".
+     */
+    private static readonly ROUND_EVAL_SETTLE_DELAY_MS = parseInt(
+        process.env.ROUND_EVAL_SETTLE_DELAY_MS ?? "2500",
+        10,
+    );
+
     private currentGameState: GameState;
     private readonly actionsSubject = new Subject<ChatAction>();
 
@@ -364,6 +392,10 @@ export class GameCycleService implements OnModuleInit {
                     break;
 
                 case GameCycleState.ROUND_EVAL:
+                    // Voir ROUND_EVAL_SETTLE_DELAY_MS : on attend que l'écran
+                    // de décompte des gains ait fini de s'animer avant
+                    // d'encaisser, pour éviter un crash du mod.
+                    await sleep(GameCycleService.ROUND_EVAL_SETTLE_DELAY_MS);
                     await this.botService.cashOut();
                     didAutoAction = true;
                     break;

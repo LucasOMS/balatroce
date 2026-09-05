@@ -77,6 +77,7 @@ utilisée si elles ne sont pas définies (fallback). Ces variables peuvent être
 | `ANARCHY_BIAS_TARGET_SHARE`         | Part des votes (0-1) à partir de laquelle le biais du mode Anarchie s'applique pleinement                  | `0.9`                                            |
 | `ANARCHY_BIAS_TARGET_PROBABILITY`   | Probabilité cible (0-1) de tirer l'action la plus votée en mode Anarchie                                    | `0.7`                                            |
 | `BOT_REQUEST_TIMEOUT_MS`            | Timeout (ms) d'une requête vers l'API BalatroBot                                                           | `5000`                                           |
+| `ROUND_EVAL_SETTLE_DELAY_MS`        | Délai (ms) attendu après la fin d'une manche avant d'encaisser, pour laisser le jeu finir d'animer l'écran de décompte des gains (évite un plantage) | `2500`                                           |
 | `WATCHDOG_CHECK_INTERVAL_MS`        | Intervalle (ms) entre deux vérifications que le jeu répond bien                                            | `5000`                                           |
 | `WATCHDOG_FAILURE_THRESHOLD`        | Nombre d'échecs consécutifs avant de considérer que le jeu a planté et de le relancer                      | `3`                                               |
 | `WATCHDOG_PRE_KILL_DELAY_MS`        | Délai (ms) entre l'affichage du message overlay et l'arrêt du jeu                                          | `2000`                                           |

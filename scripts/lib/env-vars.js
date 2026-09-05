@@ -81,6 +81,12 @@ module.exports = [
         default: "5000",
     },
     {
+        name: "ROUND_EVAL_SETTLE_DELAY_MS",
+        description:
+            "Délai (en millisecondes) attendu après la fin d'une manche avant d'encaisser, pour laisser le jeu finir d'animer l'écran de décompte des gains (sinon risque de plantage).",
+        default: "2500",
+    },
+    {
         name: "WATCHDOG_CHECK_INTERVAL_MS",
         description: "Intervalle (en millisecondes) entre deux vérifications que le jeu répond bien.",
         default: "5000",
