@@ -50,11 +50,24 @@ export class AutosaveService {
   }
 
   /**
-   * Sauvegarde automatiquement la run en cours (si `state` n'est pas MENU).
-   * Une erreur ici n'est jamais bloquante pour l'appelant.
+   * Sauvegarde automatiquement la run en cours (si `state` n'est pas MENU ni
+   * ROUND_EVAL). Une erreur ici n'est jamais bloquante pour l'appelant.
+   *
+   * ROUND_EVAL est exclu car cet état est transitoire : le bouton de cash
+   * out peut apparaître alors que l'écran de décompte des gains est encore
+   * en cours d'animation côté jeu (voir `ROUND_EVAL_SETTLE_DELAY_MS` dans
+   * `GameCycleService`). Sauvegarder à ce moment-là capturerait un état
+   * incohérent qui replante le mod au rechargement. `GameCycleService`
+   * relance de toute façon immédiatement un cycle (via son mécanisme
+   * `didAutoAction`) qui attend la stabilisation avant d'encaisser puis
+   * déclenche une nouvelle sauvegarde une fois l'état à nouveau stable
+   * (typiquement SHOP).
    */
   public async trySave(state: GameState): Promise<void> {
-    if (state.state === GameCycleState.MENU) {
+    if (
+      state.state === GameCycleState.MENU ||
+      state.state === GameCycleState.ROUND_EVAL
+    ) {
       return;
     }
     try {
