@@ -75,14 +75,19 @@ export class OverlayService {
             case GameCycleState.MENU:
                 res = [ActionKeyword.StartRun];
                 break;
-            case GameCycleState.BLIND_SELECT:
+            case GameCycleState.BLIND_SELECT: {
+                // La blinde boss ne peut jamais être passée (voir isActionValid
+                // dans GameCycleService) : on ne propose pas la commande de
+                // skip dans l'overlay lorsqu'elle est sélectionnable.
+                const isBossBlindSelectable = state.blinds?.boss?.status === "SELECT";
                 res = [
                     ActionKeyword.SelectBlind,
-                    ActionKeyword.SkipBlind,
+                    ...(isBossBlindSelectable ? [] : [ActionKeyword.SkipBlind]),
                     ...jokerActions,
                     ...consumableActions,
                 ];
                 break;
+            }
             case GameCycleState.SELECTING_HAND:
                 const canDiscard = (state.round?.discards_left ?? 0) > 0;
 

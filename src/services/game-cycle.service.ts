@@ -29,6 +29,23 @@ export class GameCycleService implements OnModuleInit {
     /** Durée (ms) d'affichage du message de victoire avant de passer au deck suivant */
     private static readonly WIN_MESSAGE_DURATION_MS = 5000;
 
+    /**
+     * Délai (ms) attendu après avoir détecté l'état ROUND_EVAL avant d'envoyer
+     * la commande de cash out.
+     *
+     * Le jeu construit l'écran de décompte des gains (blinde, mains/défausses
+     * restantes, jokers, tags, intérêts) au moyen d'une série d'animations
+     * différées ; le bouton de cash out n'apparaît qu'une fois toutes ces
+     * animations terminées. Si on encaisse avant la fin, le jeu plante avec
+     * une erreur "attempt to index field 'round_eval' (a nil value)" car
+     * l'écran est détruit pendant que des animations de gains sont encore en
+     * attente. Comme l'état exposé par le mod ne permet pas de savoir depuis
+     * ce côté-ci quand l'écran est réellement prêt, on attend simplement un
+     * délai couvrant le pire cas (le nombre de lignes de gains affichées est
+     * plafonné à 7 par le jeu).
+     */
+    private static readonly ROUND_EVAL_SETTLE_DELAY_MS = 8000;
+
     private currentGameState: GameState;
     private readonly actionsSubject = new Subject<ChatAction>();
 
@@ -364,6 +381,10 @@ export class GameCycleService implements OnModuleInit {
                     break;
 
                 case GameCycleState.ROUND_EVAL:
+                    // Voir ROUND_EVAL_SETTLE_DELAY_MS : on attend que l'écran
+                    // de décompte des gains ait fini de s'animer avant
+                    // d'encaisser, pour éviter un crash du mod.
+                    await sleep(GameCycleService.ROUND_EVAL_SETTLE_DELAY_MS);
                     await this.botService.cashOut();
                     didAutoAction = true;
                     break;
