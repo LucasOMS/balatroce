@@ -40,6 +40,10 @@ function runIn(cwd, command) {
     execSync(command, { cwd, stdio: "inherit" });
 }
 
+function isEnvVarDefined(name) {
+    return process.env[name] !== undefined;
+}
+
 /** Copie récursivement un dossier, en fusionnant avec le contenu existant. */
 function copyRecursive(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
@@ -149,6 +153,11 @@ async function setupEnvironmentVariables() {
     };
 
     for (const [name, value] of Object.entries(fixedVars)) {
+        if (isEnvVarDefined(name)) {
+            log(`✔ ${name} déjà défini, valeur existante conservée.`);
+            continue;
+        }
+
         try {
             setPersistentEnvVar(name, value);
             log(`✔ ${name}=${value}`);
@@ -156,6 +165,11 @@ async function setupEnvironmentVariables() {
             console.warn(`⚠️  Impossible de définir ${name} automatiquement : ${err.message}`);
             console.warn(`   Vous pourrez la définir plus tard avec scripts/configure-env.bat`);
         }
+    }
+
+    if (isEnvVarDefined("STREAMLABS_SOCKET_TOKEN")) {
+        log("✔ STREAMLABS_SOCKET_TOKEN déjà défini, valeur existante conservée.");
+        return;
     }
 
     const token = await ask(
@@ -275,7 +289,6 @@ main().catch((err) => {
     console.error(err && err.message ? err.message : err);
     process.exitCode = 1;
 });
-
 
 
 
