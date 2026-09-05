@@ -41,10 +41,21 @@ export class GameCycleService implements OnModuleInit {
      * l'écran est détruit pendant que des animations de gains sont encore en
      * attente. Comme l'état exposé par le mod ne permet pas de savoir depuis
      * ce côté-ci quand l'écran est réellement prêt, on attend simplement un
-     * délai couvrant le pire cas (le nombre de lignes de gains affichées est
-     * plafonné à 7 par le jeu).
+     * délai fixe.
+     *
+     * Chaque ligne de gain ajoute environ 0.7s d'animation (jusqu'à 7 lignes
+     * maximum, plafonnées par le jeu), plus ~1s pour le séparateur et la
+     * ligne finale : le pire des cas (beaucoup de jokers à dollars) prend
+     * environ 6 à 7s, mais la plupart des manches n'affichent que quelques
+     * lignes (voire aucune, comme lors du crash initial avec 0 main/défausse
+     * restante) et se terminent bien plus vite. On garde donc une valeur par
+     * défaut modeste ; augmentez `ROUND_EVAL_SETTLE_DELAY_MS` si des crashs
+     * surviennent malgré tout avec un run à beaucoup de jokers "money".
      */
-    private static readonly ROUND_EVAL_SETTLE_DELAY_MS = 8000;
+    private static readonly ROUND_EVAL_SETTLE_DELAY_MS = parseInt(
+        process.env.ROUND_EVAL_SETTLE_DELAY_MS ?? "2500",
+        10,
+    );
 
     private currentGameState: GameState;
     private readonly actionsSubject = new Subject<ChatAction>();
