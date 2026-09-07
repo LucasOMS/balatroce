@@ -352,6 +352,27 @@ export class GameCycleService implements OnModuleInit {
         }
     }
 
+    /**
+     * Termine la run en cours (gagnée ou perdue) : affiche éventuellement le
+     * message de victoire et avance la progression, puis revient au menu et
+     * efface la sauvegarde automatique devenue inutile.
+     */
+    private async handleGameEnd(won: boolean): Promise<void> {
+        if (won) {
+            // Le deck en cours est gagné : on affiche un message de
+            // félicitations sur l'overlay quelques secondes puis on
+            // passe au deck/difficulté suivant(e) avant de repartir.
+            await this.announcementService.announce(
+                GameCycleService.WIN_MESSAGE,
+                GameCycleService.WIN_MESSAGE_DURATION_MS,
+            );
+            this.progressionService.advance();
+        }
+        await this.botService.goToMenu();
+        // La run est terminée : plus besoin de la sauvegarde automatique.
+        this.autosaveService.clear();
+    }
+
     /** Exécute une itération du cycle de jeu. Peut lever une exception. */
     private async runStep(): Promise<void> {
         let didAutoAction = false;
@@ -362,19 +383,7 @@ export class GameCycleService implements OnModuleInit {
             switch (this.currentGameState.state) {
                 case GameCycleState.GAME_OVER:
                     this.statsService.recordGameOver(this.currentGameState.won);
-                    if (this.currentGameState.won) {
-                        // Le deck en cours est gagné : on affiche un message de
-                        // félicitations sur l'overlay quelques secondes puis on
-                        // passe au deck/difficulté suivant(e) avant de repartir.
-                        await this.announcementService.announce(
-                            GameCycleService.WIN_MESSAGE,
-                            GameCycleService.WIN_MESSAGE_DURATION_MS,
-                        );
-                        this.progressionService.advance();
-                    }
-                    await this.botService.goToMenu();
-                    // La run est terminée : plus besoin de la sauvegarde automatique.
-                    this.autosaveService.clear();
+                    await this.handleGameEnd(this.currentGameState.won);
                     didAutoAction = true;
                     break;
 
@@ -392,11 +401,23 @@ export class GameCycleService implements OnModuleInit {
                     break;
 
                 case GameCycleState.ROUND_EVAL:
-                    // Voir ROUND_EVAL_SETTLE_DELAY_MS : on attend que l'écran
-                    // de décompte des gains ait fini de s'animer avant
-                    // d'encaisser, pour éviter un crash du mod.
-                    await sleep(GameCycleService.ROUND_EVAL_SETTLE_DELAY_MS);
-                    await this.botService.cashOut();
+                    if (this.currentGameState.won) {
+                        // Le jeu affiche un écran de victoire particulier (celui
+                        // de la fin de run) par-dessus l'écran habituel de
+                        // décompte des gains, et se met en pause tant qu'on ne
+                        // l'a pas quitté. Dans cet état, le "cash out" habituel
+                        // ne peut jamais aboutir (le jeu reste bloqué en pause
+                        // sur l'écran de victoire), il faut donc directement
+                        // repasser par le menu plutôt que d'essayer d'encaisser.
+                        this.statsService.recordGameOver(true);
+                        await this.handleGameEnd(true);
+                    } else {
+                        // Voir ROUND_EVAL_SETTLE_DELAY_MS : on attend que l'écran
+                        // de décompte des gains ait fini de s'animer avant
+                        // d'encaisser, pour éviter un crash du mod.
+                        await sleep(GameCycleService.ROUND_EVAL_SETTLE_DELAY_MS);
+                        await this.botService.cashOut();
+                    }
                     didAutoAction = true;
                     break;
             }
